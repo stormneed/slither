@@ -5,13 +5,18 @@ public class SnakeBody {
     int y;
     SnakeBody next;
     SnakeBody prev;
-
     SnakeDirection prevDirection;
 
     public SnakeBody(int x, int y) {
         this.x = x;
         this.y = y;
         prevDirection = SnakeDirection.UP;
+    }
+
+    public SnakeBody (int x, int y, SnakeBody prev) {
+        this.x = x;
+        this.y = y;
+        prevDirection = prev.prevDirection;
     }
     public void setNext(SnakeBody next) {
         this.next = next;
@@ -33,7 +38,11 @@ public class SnakeBody {
     }
 
     public void move(SnakeDirection direction) {
-        switch (direction) {
+
+        SnakeDirection validDir;
+        if (validMove(direction)) validDir = direction;
+        else validDir = oppositeMove(direction);
+        switch (validDir) {
             case UP:
                 if (y == 0) {
                     y = 99;
@@ -63,10 +72,27 @@ public class SnakeBody {
                     x++;
                 }
                 break;
+            default:
+                break;
         }
         if (next != null) {
             next.move(prevDirection);
-            prevDirection = direction;
+        }
+        prevDirection = validDir;
+
+    }
+
+    private boolean validMove(SnakeDirection direction) {
+        return !prevDirection.equals(oppositeMove(direction));
+    }
+
+    private SnakeDirection oppositeMove (SnakeDirection direction) {
+        switch (direction) {
+            case UP : return SnakeDirection.DOWN;
+            case LEFT : return SnakeDirection.RIGHT;
+            case DOWN : return SnakeDirection.UP;
+            case RIGHT : return SnakeDirection.LEFT;
+            default: return null;
         }
     }
 

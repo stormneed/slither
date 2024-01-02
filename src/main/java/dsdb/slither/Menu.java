@@ -47,17 +47,14 @@ public class Menu extends Application {
                 case DOWN:
                     game.move(SnakeDirection.DOWN);
                     game.update();
-
                     break;
                 case LEFT:
                     game.move(SnakeDirection.LEFT);
                     game.update();
-
                     break;
                 case RIGHT:
                     game.move(SnakeDirection.RIGHT);
                     game.update();
-
                     break;
             }
         });
