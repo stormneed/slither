@@ -11,6 +11,8 @@ import javafx.stage.Stage;
 import java.awt.*;
 import java.io.IOException;
 
+import static java.lang.Thread.sleep;
+
 
 public class Menu extends Application {
     @Override
@@ -29,10 +31,12 @@ public class Menu extends Application {
         stage.show();
     }
 
+
+
     public void startGame() {
         Game game= new Game();
         AnchorPane root= game.getGrid();
-        root.setPrefSize(1000,1000);
+        root.setPrefSize(800,800);
         Scene scene = new Scene(root);
 
         scene.setOnKeyPressed(e -> {
@@ -43,7 +47,14 @@ public class Menu extends Application {
                 case RIGHT -> SnakeDirection.RIGHT;
                 default -> SnakeDirection.NONE;
             };
-            game.move(dir);
+            game.move(dir,game.players.get(0));
+            try {
+                sleep(2);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+            game.move(game.directionIA(),game.players.get(1));
+
         });
         Stage stage = new Stage();
         stage.setTitle("Snake");

@@ -22,6 +22,11 @@ public class SnakeFactory {
         return circle;
     }
 
+    public static SnakeCell createSnakeIA(int x, int y) {
+        return new SnakeCell(x,y,Color.BLUE);
+    }
+
+
     public static Circle createFood(double x, double y) {
         Circle pane = new Circle(5);
         pane.setCenterX(x);

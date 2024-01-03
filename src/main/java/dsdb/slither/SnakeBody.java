@@ -1,111 +1,78 @@
 package dsdb.slither;
 
-import javafx.scene.shape.Circle;
+
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
-public class SnakeBody extends Circle {
-    SnakeDirection prevDirection;
+import java.util.ArrayList;
 
-    SnakeBody next;
-    SnakeBody prev;
-    SnakeDirection prevDirection;
+public class SnakeBody {
+    boolean [][] board;
+    SnakeCell head;
+    SnakeCell tail;
+    ArrayList<SnakeCell> body;
 
+    ArrayList<Pair<Double,Double>> foods;
 
-
-    public SnakeBody (double x, double y, SnakeDirection prev) {
-        super(5);
-        this.setFill(javafx.scene.paint.Color.RED);
-        this.setStroke(javafx.scene.paint.Color.BLACK);
-        this.setCenterX(x);
-        this.setCenterY(y);
-        this.prevDirection=prev;
+    public SnakeBody(Color playerColor) {
+        head = new SnakeCell(500, 500,playerColor);
+        SnakeCell body1 = new SnakeCell(500, 510,playerColor);
+        body=new ArrayList<>();
+        body.add(body1);
+        SnakeCell body2 = new SnakeCell(500, 520,playerColor);
+        body.add(body2);
+        tail= new SnakeCell(500, 530,playerColor);
+        head.setNext(body1);
+        body1.setPrev(head);
+        body1.setNext(body2);
+        body2.setPrev(body1);
+        body2.setNext(tail);
+        tail.setPrev(body2);
     }
 
-    public SnakeBody(double x, double y) {
-        new SnakeBody(x,y,SnakeDirection.UP);
-    }
-
-    public void setNext(SnakeBody next) {
-        this.next = next;
-    }
-
-    public void setPrev(SnakeBody prev) {
-        this.prev = prev;
-    }
-    public void setPos(double x, double y) {
-        this.setCenterX(x);
-        this.setCenterY(y);
-    }
-    public SnakeBody getNext() {
-        return next;
-    }
-    public SnakeBody getPrev() {
-        return prev;
-    }
-    public double getX() {
-        return this.getCenterX();
-    }
-    public double getY() {
-        return this.getCenterY();
-    }
-
-    public void move(SnakeDirection direction) {
-
-        SnakeDirection validDir;
-        if (validMove(direction)) validDir = direction;
-        else validDir = oppositeMove(direction);
-        switch (validDir) {
-            case UP:
-                if (this.getCenterY() == 0) {
-                    setCenterY(990);
-                } else {
-                    setCenterY(this.getCenterY() - 10);
-                }
-
+    // A tester si il peut grandir hors bordure
+    public SnakeCell growSnake (Color playerColor) {
+        SnakeCell newTail;
+        switch (tail.prevDirection) {
+            case UP :
+                newTail = new SnakeCell(tail.getX(), (tail.getY()+10)%800,playerColor,tail.prevDirection);
+                body.add(newTail);
                 break;
-            case DOWN:
-                if (this.getCenterY() == 990) {
-                    setCenterY(0);
-                } else {
-                    setCenterY(this.getCenterY() + 10);
-                }
+            case LEFT :
+                newTail = new SnakeCell((tail.getX()+10)%800, tail.getY(),playerColor,tail.prevDirection);
+                body.add(newTail);
                 break;
-            case LEFT:
-                if (this.getCenterX() == 0) {
-                    setCenterX(990);
-                } else {
-                    setCenterX(this.getCenterX() - 10);
-                }
+            case DOWN :
+                newTail = new SnakeCell(tail.getX(), (tail.getY()-10)%800,playerColor,tail.prevDirection);
+                body.add(newTail);
                 break;
-            case RIGHT:
-                if (this.getCenterX() == 990) {
-                    setCenterX(0);
-                } else {
-                    setCenterX(this.getCenterX() + 10);
-                }
+            case RIGHT :
+                newTail = new SnakeCell((tail.getX()-10)%800, tail.getY(),playerColor,tail.prevDirection);
+                body.add(newTail);
                 break;
             default:
+                newTail = new SnakeCell(tail.getX(), tail.getY(),playerColor,tail.prevDirection);
+                body.add(newTail);
                 break;
-        }
-        if (next != null) {
-            next.move(prevDirection);
-        }
-        prevDirection = validDir;
 
+        }
+        System.out.println(body.size());
+        SnakeCell temp = tail;
+        temp.setNext(newTail);
+        tail = newTail;
+        tail.setPrev(temp);
+        return newTail;
     }
 
-    private boolean validMove(SnakeDirection direction) {
-        return !prevDirection.equals(oppositeMove(direction));
+    public SnakeCell getHead() {
+        return head;
     }
 
-    private SnakeDirection oppositeMove (SnakeDirection direction) {
-        switch (direction) {
-            case UP : return SnakeDirection.DOWN;
-            case LEFT : return SnakeDirection.RIGHT;
-            case DOWN : return SnakeDirection.UP;
-            case RIGHT : return SnakeDirection.LEFT;
-            default: return null;
-        }
+    public SnakeCell getTail() {
+        return tail;
     }
 
+    public void setTail (SnakeCell tail) {
+        this.tail = tail;
+    }
 }

@@ -1,104 +1,156 @@
 package dsdb.slither;
 
-import javafx.collections.ObservableList;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.util.Pair;
 
-import javax.swing.text.html.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Game {
     AnchorPane grid;
 
-    SnakeBody head;
-    int prevtail_x;
-    int prevtail_y;
-    SnakeGame snakeGame;
-    GridCords foodCords;
+    SnakeCell head;
 
+    SnakeBody snakeGame;
+    SnakeBody snakeIAGame;
 
+    List<SnakeBody> players;
+
+    ArrayList<GridCords> foods = new ArrayList<>();
 
 
     public Game() {
 
         grid = new AnchorPane();
-        grid.setPrefSize(1000, 1000);
-        snakeGame= new SnakeGame();
-        generateFood();
-        head = snakeGame.getHead();
-        while (head != null) {
-            grid.getChildren().add(head);
-            head = head.getNext();
+        grid.setPrefSize(800, 800);
+        snakeGame= new SnakeBody(Color.RED);
+        snakeIAGame= new SnakeBody(Color.BLUE);
+        players=new ArrayList<>();
+        players.add(snakeGame);
+        players.add(snakeIAGame);
+
+
+        for (int i = 0; i < 20; i++) {
+            foods.add(generateFood());
         }
+        head = snakeGame.getHead();
 
-
-        for (Pair<Double, Double> food : snakeGame.getFoods()) {
-
-            grid.getChildren().add(SnakeFactory.createFood(food.getKey(), food.getValue()));
+        for(SnakeBody s:players) {
+            SnakeCell current = s.head;
+            while (current != null) {
+                grid.getChildren().add(current);
+                current = current.getNext();
+            }
         }
     }
 
     public class GridCords {
-        int x,y;
-        public GridCords(int x, int y) {
+
+        Circle foodgraph;
+        double x,y;
+        public GridCords(double x, double y,Circle foodgraph) {
             this.x = x;
             this.y = y;
+            this.foodgraph=foodgraph;
         }
-        public boolean isOverlap (SnakeBody body) {
-            return body.getX() == x && body.getY() == y;
+
+        public GridCords(double x, double y) {
+            this.x = x;
+            this.y = y;
+            foodgraph=SnakeFactory.createFood(x,y);
         }
-    }
+        public boolean isOverlap (SnakeCell body) {
 
-    public void generateFood () {
-        int x = new Random().nextInt(100);
-        int y = new Random().nextInt(100);
-        foodCords = new GridCords(x,y);
-        grid.add(SpaceFactory.createFoodSpace(),x,y);
-    }
-
-    public void move(SnakeDirection direction) {
-        if (foodCords.isOverlap(head)) {
-            snakeGame.growSnake();
-            generateFood();
+                double d = Math.sqrt((body.getX() - this.x) * (body.getX() - x))
+                        + (body.getY() - y) * (body.getY() - y);
+                return d <= 50;
         }
-        prevtail_x = snakeGame.getTail().getX();
-        prevtail_y = snakeGame.getTail().getY();
-        System.out.println(prevtail_x + " " + prevtail_y);
-        head.move(direction);
-        update();
 
-
-        SnakeBody m=snakeGame.move(direction);
-        if(m != null) {
-            grid.getChildren().add(m);
+        public void removeGraph() {
+            grid.getChildren().remove(foodgraph);
         }
     }
 
-    public void snakeGrow () {
-        SnakeBody oldTail = snakeGame.getTail();
-        SnakeBody newTail = new SnakeBody(oldTail.getX(), oldTail.getY(), oldTail);
-        oldTail.setNext(newTail);
-        newTail.setPrev(oldTail);
-        snakeGame.setTail(newTail);
+    public GridCords generateFood () {
+        double x = new Random().nextInt(800);
+        double y = new Random().nextInt(800);
+        Circle a=SnakeFactory.createFood(x,y);
+        GridCords foodCords = new GridCords(x,y,a);
+        grid.getChildren().add(a);
+        return foodCords;
     }
 
+    public void move(SnakeDirection direction,SnakeBody s) {
+        for (GridCords foodCords : foods) {
+            if (foodCords.isOverlap(head)) {
+                foodCords.removeGraph();
+                foods.remove(foodCords);
+                grid.getChildren().add(s.growSnake(s.head.color));
+                foods.add(generateFood());
+                break;
+            }
+        }
+        s.head.move(direction);
+//        update();
+    }
+
+
+    public GridCords getClosestFood(SnakeBody s){
+        SnakeCell head = s.getHead();
+        GridCords closestFood = foods.get(0);
+        double minDistance = Math.sqrt((head.getX() - closestFood.x) * (head.getX() - closestFood.x))
+                + (head.getY() - closestFood.y) * (head.getY() - closestFood.y);
+        for (GridCords food : foods) {
+            double distance = Math.sqrt((head.getX() - food.x) * (head.getX() - food.x))
+                    + (head.getY() - food.y) * (head.getY() - food.y);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestFood = food;
+            }
+        }
+        System.out.println(closestFood.x+" "+closestFood.y);
+        return closestFood;
+    }
+
+    public SnakeDirection directionIA(){
+        SnakeCell headIA = snakeIAGame.getHead();
+        Circle food = getClosestFood(snakeIAGame).foodgraph;
+        if (headIA.getX() < food.getCenterX()+10) {
+            return SnakeDirection.RIGHT;
+        } else if (headIA.getX() > food.getCenterX()-10) {
+            return SnakeDirection.LEFT;
+        } else if (headIA.getY() < food.getCenterY()+10) {
+           return SnakeDirection.DOWN;
+        } else if (headIA.getY() > food.getCenterY()-10) {
+           return SnakeDirection.UP;
+        }
+        else return SnakeDirection.NONE;
+    }
 
     public AnchorPane getGrid() {
         return grid;
     }
 
-    public SnakeBody getHead() {
+    public SnakeCell getHead() {
         return head;
     }
+
+
+
+//    public void update() {
+//
+//        SnakeBody current = head;
+//        while (current != null) {
+//            SnakeBody finalCurrent = current;
+//            grid.getChildren().removeIf(node -> GridPane.getColumnIndex(node) == finalCurrent.getX() && GridPane.getRowIndex(node) == finalCurrent.getY());
+//            grid.add(SpaceFactory.createSnakeSpace(), current.getX(), current.getY());
+//            current = current.getNext();
+//        }
+//        grid.add(SpaceFactory.createEmptySpace(), prevtail_x, prevtail_y);
+//    }
+
 
 
 }
