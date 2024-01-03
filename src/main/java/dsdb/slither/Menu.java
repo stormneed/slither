@@ -40,19 +40,22 @@ public class Menu extends Application {
         Scene scene = new Scene(root);
 
         scene.setOnKeyPressed(e -> {
-            SnakeDirection dir = switch (e.getCode()) {
-                case UP -> SnakeDirection.UP;
-                case DOWN -> SnakeDirection.DOWN;
-                case LEFT -> SnakeDirection.LEFT;
-                case RIGHT -> SnakeDirection.RIGHT;
-                default -> SnakeDirection.NONE;
+            switch (e.getCode()) {
+                case UP -> {game.move(SnakeDirection.UP,game.players.get(0));}
+                case DOWN -> {game.move(SnakeDirection.DOWN,game.players.get(0));}
+                case LEFT -> {game.move(SnakeDirection.LEFT,game.players.get(0));}
+                case RIGHT -> {game.move(SnakeDirection.RIGHT,game.players.get(0));}
+                case Z -> {game.move(SnakeDirection.UP,game.players.get(2));}
+                case S -> {game.move(SnakeDirection.DOWN,game.players.get(2));}
+                case Q -> {game.move(SnakeDirection.LEFT,game.players.get(2));}
+                case D -> {game.move(SnakeDirection.RIGHT,game.players.get(2));}
+                default -> {game.move(SnakeDirection.NONE,game.players.get(0));}
+
             };
-            game.move(dir,game.players.get(0));
-            try {
-                sleep(2);
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
-            }
+
+
+
+
             game.move(game.directionIA(),game.players.get(1));
 
         });

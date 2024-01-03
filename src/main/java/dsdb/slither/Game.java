@@ -3,7 +3,6 @@ package dsdb.slither;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -24,10 +23,12 @@ public class Game {
         grid = new AnchorPane();
         grid.setPrefSize(800, 800);
         snakeGame= new SnakeBody(Color.RED);
+
         snakeIAGame= new SnakeBody(Color.BLUE);
         players=new ArrayList<>();
         players.add(snakeGame);
         players.add(snakeIAGame);
+        players.add(new SnakeBody(Color.GOLD));
 
 
         for (int i = 0; i < 20; i++) {
@@ -79,7 +80,7 @@ public class Game {
         return foodCords;
     }
 
-    public void move(SnakeDirection direction,SnakeBody s) {
+    public synchronized void move(SnakeDirection direction,SnakeBody s) {
         for (GridCords foodCords : foods) {
             if (foodCords.isOverlap(s.head)) {
                 foodCords.removeGraph();
