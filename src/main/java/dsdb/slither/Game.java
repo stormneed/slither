@@ -3,16 +3,22 @@ package dsdb.slither;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Circle;
+import javafx.util.Pair;
 
 import javax.swing.text.html.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Game {
-    GridPane grid;
+    AnchorPane grid;
+
     SnakeBody head;
     int prevtail_x;
     int prevtail_y;
@@ -20,23 +26,25 @@ public class Game {
     GridCords foodCords;
 
 
+
+
     public Game() {
-        grid = new GridPane();
-        for (int i = 0; i < 100; i++) {
-            for (int j = 0; j < 100; j++) {
-                grid.add(SpaceFactory.createEmptySpace(), i, j);
-            }
-        }
+
+        grid = new AnchorPane();
+        grid.setPrefSize(1000, 1000);
         snakeGame= new SnakeGame();
         generateFood();
         head = snakeGame.getHead();
-        SnakeBody current = head;
-        while (current != null) {
-            grid.add(SpaceFactory.createSnakeSpace(), current.getX(), current.getY());
-            current = current.getNext();
+        while (head != null) {
+            grid.getChildren().add(head);
+            head = head.getNext();
         }
 
 
+        for (Pair<Double, Double> food : snakeGame.getFoods()) {
+
+            grid.getChildren().add(SnakeFactory.createFood(food.getKey(), food.getValue()));
+        }
     }
 
     public class GridCords {
@@ -67,6 +75,12 @@ public class Game {
         System.out.println(prevtail_x + " " + prevtail_y);
         head.move(direction);
         update();
+
+
+        SnakeBody m=snakeGame.move(direction);
+        if(m != null) {
+            grid.getChildren().add(m);
+        }
     }
 
     public void snakeGrow () {
@@ -77,28 +91,14 @@ public class Game {
         snakeGame.setTail(newTail);
     }
 
-    public GridPane getGrid() {
+
+    public AnchorPane getGrid() {
         return grid;
     }
 
     public SnakeBody getHead() {
         return head;
     }
-
-
-
-    public void update() {
-
-        SnakeBody current = head;
-        while (current != null) {
-            SnakeBody finalCurrent = current;
-            grid.getChildren().removeIf(node -> GridPane.getColumnIndex(node) == finalCurrent.getX() && GridPane.getRowIndex(node) == finalCurrent.getY());
-            grid.add(SpaceFactory.createSnakeSpace(), current.getX(), current.getY());
-            current = current.getNext();
-        }
-        grid.add(SpaceFactory.createEmptySpace(), prevtail_x, prevtail_y);
-    }
-
 
 
 }
