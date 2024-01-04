@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.awt.*;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
 
@@ -38,25 +39,24 @@ public class Menu extends Application {
         AnchorPane root= game.getGrid();
         root.setPrefSize(800,800);
         Scene scene = new Scene(root);
+        game.executor.scheduleAtFixedRate(game.moveRunnable, 0,50, TimeUnit.MILLISECONDS);
 
         scene.setOnKeyPressed(e -> {
             switch (e.getCode()) {
-                case UP -> {game.move(SnakeDirection.UP,game.players.get(0));}
-                case DOWN -> {game.move(SnakeDirection.DOWN,game.players.get(0));}
-                case LEFT -> {game.move(SnakeDirection.LEFT,game.players.get(0));}
-                case RIGHT -> {game.move(SnakeDirection.RIGHT,game.players.get(0));}
-                case Z -> {game.move(SnakeDirection.UP,game.players.get(2));}
-                case S -> {game.move(SnakeDirection.DOWN,game.players.get(2));}
-                case Q -> {game.move(SnakeDirection.LEFT,game.players.get(2));}
-                case D -> {game.move(SnakeDirection.RIGHT,game.players.get(2));}
-                default -> {game.move(SnakeDirection.NONE,game.players.get(0));}
-
+                case UP -> {game.players.get(0).setSnakeDirection(SnakeDirection.UP);}
+                case DOWN -> {game.players.get(0).setSnakeDirection(SnakeDirection.DOWN);}
+                case LEFT -> {game.players.get(0).setSnakeDirection(SnakeDirection.LEFT);}
+                case RIGHT -> {game.players.get(0).setSnakeDirection(SnakeDirection.RIGHT);}
+                case Z -> {game.players.get(2).setSnakeDirection(SnakeDirection.UP);}
+                case S -> {game.players.get(2).setSnakeDirection(SnakeDirection.DOWN);}
+                case Q -> {game.players.get(2).setSnakeDirection(SnakeDirection.LEFT);}
+                case D -> {game.players.get(2).setSnakeDirection(SnakeDirection.RIGHT);}
             };
 
 
 
 
-            game.move(game.directionIA(),game.players.get(1));
+
 
         });
         Stage stage = new Stage();

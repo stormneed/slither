@@ -7,12 +7,10 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 
 public class SnakeBody {
-    boolean [][] board;
-    SnakeCell head;
-    SnakeCell tail;
-    ArrayList<SnakeCell> body;
-
-    ArrayList<Pair<Double,Double>> foods;
+    private SnakeCell head;
+    private SnakeCell tail;
+    private ArrayList<SnakeCell> body;
+    private SnakeDirection snakeDirection;
 
     public SnakeBody(Color playerColor) {
         head = new SnakeCell(500, 500,playerColor);
@@ -28,6 +26,7 @@ public class SnakeBody {
         body2.setPrev(body1);
         body2.setNext(tail);
         tail.setPrev(body2);
+        snakeDirection=SnakeDirection.UP;
     }
 
     // A tester si il peut grandir hors bordure
@@ -74,5 +73,12 @@ public class SnakeBody {
 
     public void setTail (SnakeCell tail) {
         this.tail = tail;
+    }
+
+    public SnakeDirection getSnakeDirection() {
+        return snakeDirection;
+    }
+    public void setSnakeDirection(SnakeDirection direction) {
+        this.snakeDirection=direction;
     }
 }

@@ -6,6 +6,8 @@ import javafx.scene.shape.Circle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class Game {
     AnchorPane grid;
@@ -15,7 +17,7 @@ public class Game {
 
     List<SnakeBody> players;
 
-    ArrayList<GridCords> foods = new ArrayList<>();
+    ArrayList<FoodCords> foods = new ArrayList<>();
 
 
     public Game() {
@@ -36,7 +38,7 @@ public class Game {
         }
 
         for(SnakeBody s:players) {
-            SnakeCell current = s.head;
+            SnakeCell current = s.getHead();
             while (current != null) {
                 grid.getChildren().add(current);
                 current = current.getNext();
@@ -44,17 +46,18 @@ public class Game {
         }
     }
 
-    public class GridCords {
+    public class FoodCords {
 
-        Circle foodgraph;
-        double x,y;
-        public GridCords(double x, double y,Circle foodgraph) {
+        private Circle foodgraph;
+        private boolean eaten;
+        private double x,y;
+        public FoodCords(double x, double y, Circle foodgraph) {
             this.x = x;
             this.y = y;
             this.foodgraph=foodgraph;
         }
 
-        public GridCords(double x, double y) {
+        public FoodCords(double x, double y) {
             this.x = x;
             this.y = y;
             foodgraph=SnakeFactory.createFood(x,y);
@@ -65,42 +68,62 @@ public class Game {
                         + (body.getY() - y) * (body.getY() - y);
                 return d <= 50;
         }
-
         public void removeGraph() {
             grid.getChildren().remove(foodgraph);
         }
+
+        public boolean isEaten() {
+            return eaten;
+        }
+
+        public void setEaten(boolean eaten) {
+            this.eaten = eaten;
+        }
     }
 
-    public GridCords generateFood () {
+    public FoodCords generateFood () {
         double x = new Random().nextInt(800);
         double y = new Random().nextInt(800);
         Circle a=SnakeFactory.createFood(x,y);
-        GridCords foodCords = new GridCords(x,y,a);
+        FoodCords foodCords = new FoodCords(x,y,a);
         grid.getChildren().add(a);
         return foodCords;
     }
 
     public synchronized void move(SnakeDirection direction,SnakeBody s) {
-        for (GridCords foodCords : foods) {
-            if (foodCords.isOverlap(s.head)) {
-                foodCords.removeGraph();
-                foods.remove(foodCords);
-                grid.getChildren().add(s.growSnake(s.head.color));
-                foods.add(generateFood());
-                break;
-            }
-        }
-        s.head.move(direction);
+        s.getHead().move(direction);
+//        for (FoodCords foodCords : foods) {
+//            if (foodCords.isOverlap(s.getHead()) && !foodCords.isEaten()) {
+//                foodCords.setEaten(true);
+//                foodCords.removeGraph();
+//                grid.getChildren().add(s.growSnake(s.getHead().color));
+//                foods.add(generateFood());
+//                break;
+//            }
+//        }
 //        update();
     }
 
+    Runnable moveRunnable = new Runnable() {
+        public void run() {
+            for (SnakeBody snake : players ) {
+                if (snake.equals(players.get(1))) { move(directionIA(),players.get(1)); continue; }
+                move(snake.getSnakeDirection(),snake);
 
-    public GridCords getClosestFood(SnakeBody s){
+            }
+
+        }
+    };
+
+    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+
+    public FoodCords getClosestFood(SnakeBody s){
         SnakeCell head = s.getHead();
-        GridCords closestFood = foods.get(0);
+        FoodCords closestFood = foods.get(0);
         double minDistance = Math.sqrt((head.getX() - closestFood.x) * (head.getX() - closestFood.x))
                 + (head.getY() - closestFood.y) * (head.getY() - closestFood.y);
-        for (GridCords food : foods) {
+        for (FoodCords food : foods) {
             double distance = Math.sqrt((head.getX() - food.x) * (head.getX() - food.x))
                     + (head.getY() - food.y) * (head.getY() - food.y);
             if (distance < minDistance) {
@@ -114,7 +137,7 @@ public class Game {
 
     public SnakeDirection directionIA(){
         SnakeCell headIA = snakeIAGame.getHead();
-        GridCords food = getClosestFood(snakeIAGame);
+        FoodCords food = getClosestFood(snakeIAGame);
         System.out.println("IA"+headIA.getCenterX()+" "+headIA.getCenterY()+"\n__________");
         if (headIA.getX() < food.x-5) {
             return SnakeDirection.RIGHT;
