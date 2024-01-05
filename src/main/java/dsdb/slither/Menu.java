@@ -35,6 +35,7 @@ public class Menu extends Application {
 
 
     public void startGame() {
+        System.out.println("Starting game...");
         Game game= new Game();
         AnchorPane root= game.getGrid();
         root.setPrefSize(800,800);
@@ -62,6 +63,10 @@ public class Menu extends Application {
         Stage stage = new Stage();
         stage.setTitle("Snake");
         stage.setScene(scene);
+        stage.onCloseRequestProperty().setValue(e -> {
+            game.executor.shutdown();
+            System.exit(0);
+        });
         stage.show();
     }
     public static void main(String[] args) {

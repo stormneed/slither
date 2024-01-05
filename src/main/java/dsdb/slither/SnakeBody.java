@@ -2,7 +2,6 @@ package dsdb.slither;
 
 
 import javafx.scene.paint.Color;
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 
@@ -30,7 +29,7 @@ public class SnakeBody {
     }
 
     // A tester si il peut grandir hors bordure
-    public SnakeCell growSnake (Color playerColor) {
+    public synchronized SnakeCell growSnake (Color playerColor) {
         SnakeCell newTail;
         switch (tail.prevDirection) {
             case UP :
