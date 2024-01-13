@@ -15,8 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class Game {
     private AnchorPane grid;
-    private SnakeBody snakeGame;
-    private SnakeBody snakeIAGame;
+
 
     private final List<SnakeBody> players;
     private ArrayList<FoodCords> foods = new ArrayList<>();
@@ -26,8 +25,8 @@ public class Game {
 
         grid = new AnchorPane();
         grid.setPrefSize(800, 800);
-        snakeGame= new SnakeBody(Color.RED,6,600,600);
-        snakeIAGame= new SnakeBody(Color.BLUE,5,400,400);
+        SnakeBody snakeGame= new SnakeBody(Color.RED,6,600,600);
+        SnakeBody snakeIAGame= new SnakeBody(Color.BLUE,5,400,400);
         players=new ArrayList<>();
         players.add(snakeGame);
         players.add(snakeIAGame);
@@ -91,7 +90,7 @@ public class Game {
     }
 
     public synchronized void move(SnakeDirection direction, SnakeBody s) {
-        s.getHead().move(direction);
+        s.getHead().moveHead(direction);
         handleFood(s);
         handleCollision(s);
 
@@ -191,8 +190,8 @@ public class Game {
     }
 
     public SnakeDirection directionIA(){
-        SnakeCell headIA = snakeIAGame.getHead();
-        FoodCords food = getClosestFood(snakeIAGame);
+        SnakeCell headIA = players.get(1).getHead();
+        FoodCords food = getClosestFood(players.get(1));
         if (headIA.getX() < food.x-5) {
             return SnakeDirection.RIGHT;
         } else if (headIA.getX() > food.x+5) {
