@@ -1,8 +1,10 @@
-package dsdb.slither;
+package slither;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import slither.cells.SnakeCell;
+import slither.cells.SnakeCellBase;
 
 public class SnakeFactory {
     public static Pane createEmptySpace() {
@@ -21,11 +23,6 @@ public class SnakeFactory {
         circle.setStroke(javafx.scene.paint.Color.BLACK);
         return circle;
     }
-
-    public static SnakeCell createSnakeIA(int x, int y) {
-        return new SnakeCell(x,y,Color.BLUE);
-    }
-
 
     public static Circle createFood(double x, double y) {
         Circle pane = new Circle(5);

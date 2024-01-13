@@ -1,34 +1,18 @@
-package dsdb.slither;
+package slither.cells;
 
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import slither.SnakeDirection;
 
-public class SnakeCell extends Circle {
-    SnakeDirection prevDirection;
-     Color color;
-    SnakeCell next;
-    SnakeCell prev;
+public abstract class SnakeCell extends Circle {
+    private SnakeDirection prevDirection;
+    private Color color;
+    private SnakeCell next;
+    private SnakeCell prev;
 
-
-
-    public SnakeCell(double x, double y, Color c, SnakeDirection prev) {
-        super(5);
-        this.setFill(c);
-        this.setStroke(javafx.scene.paint.Color.BLACK);
-        this.setCenterX(x);
-        this.setCenterY(y);
-        this.prevDirection=prev;
-        color=c;
-    }
-
-    public SnakeCell(double x, double y, Color c) {
-        super(5);
-        this.setFill(c);
-        this.setStroke(javafx.scene.paint.Color.BLACK);
-        this.setCenterX(x);
-        this.setCenterY(y);
-        this.prevDirection=SnakeDirection.UP;
-        color=c;
+    public SnakeCell (int n) {
+        super(n);
     }
 
     public void setNext(SnakeCell next) {
@@ -54,6 +38,8 @@ public class SnakeCell extends Circle {
     public double getY() {
         return this.getCenterY();
     }
+    public void setX(double x) {this.setCenterX(x);}
+    public void setY(double y) {this.setCenterY(y);}
 
     public void move(SnakeDirection direction) {
         SnakeDirection validDir;
@@ -61,32 +47,31 @@ public class SnakeCell extends Circle {
         else validDir = oppositeMove(direction);
         switch (validDir) {
             case UP:
-                if (this.getCenterY() == 0) {
+                if (this.getCenterY() <= 0) {
                     setCenterY(790);
                 } else {
-                    setCenterY(this.getCenterY() - 10);
+                    setCenterY(this.getCenterY() - 5.0);
                 }
-
                 break;
             case DOWN:
-                if (this.getCenterY() == 790) {
+                if (this.getCenterY() >= 790) {
                     setCenterY(0);
                 } else {
-                    setCenterY(this.getCenterY() + 10);
+                    setCenterY(this.getCenterY() + 5.0);
                 }
                 break;
             case LEFT:
-                if (this.getCenterX() == 0) {
+                if (this.getCenterX() <= 0) {
                     setCenterX(790);
                 } else {
-                    setCenterX(this.getCenterX() - 10);
+                    setCenterX(this.getCenterX() - 5.0);
                 }
                 break;
             case RIGHT:
-                if (this.getCenterX() == 790) {
+                if (this.getCenterX() >= 790) {
                     setCenterX(0);
                 } else {
-                    setCenterX(this.getCenterX() + 10);
+                    setCenterX(this.getCenterX() + 5.0);
                 }
                 break;
             default:
@@ -104,12 +89,35 @@ public class SnakeCell extends Circle {
     }
 
     private SnakeDirection oppositeMove (SnakeDirection direction) {
-        switch (direction) {
-            case UP : return SnakeDirection.DOWN;
-            case LEFT : return SnakeDirection.RIGHT;
-            case DOWN : return SnakeDirection.UP;
-            case RIGHT : return SnakeDirection.LEFT;
-            default: return null;
+        return switch (direction) {
+            case UP -> SnakeDirection.DOWN;
+            case LEFT -> SnakeDirection.RIGHT;
+            case DOWN -> SnakeDirection.UP;
+            case RIGHT -> SnakeDirection.LEFT;
+            default -> SnakeDirection.UP;
+        };
+    }
+
+    public SnakeDirection getPrevDirection() {
+        return prevDirection;
+    }
+
+    public void setPrevDirection(SnakeDirection prevDirection) {
+        this.prevDirection = prevDirection;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public void destroy() {
+        if (getParent()!=null) {
+            Pane parentPane = (Pane) getParent();
+            parentPane.getChildren().remove(this);
         }
     }
 

@@ -1,9 +1,11 @@
-package dsdb.slither;
+package slither;
 
 import javafx.application.Platform;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import slither.cells.SnakeCell;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,27 +14,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class Game {
-    AnchorPane grid;
+    private AnchorPane grid;
+    private SnakeBody snakeGame;
+    private SnakeBody snakeIAGame;
 
-    SnakeBody snakeGame;
-    SnakeBody snakeIAGame;
-
-    List<SnakeBody> players;
-
-    ArrayList<FoodCords> foods = new ArrayList<>();
+    private final List<SnakeBody> players;
+    private ArrayList<FoodCords> foods = new ArrayList<>();
 
 
     public Game() {
 
         grid = new AnchorPane();
         grid.setPrefSize(800, 800);
-        snakeGame= new SnakeBody(Color.RED);
-
-        snakeIAGame= new SnakeBody(Color.BLUE);
+        snakeGame= new SnakeBody(Color.RED,6,600,600);
+        snakeIAGame= new SnakeBody(Color.BLUE,5,400,400);
         players=new ArrayList<>();
         players.add(snakeGame);
         players.add(snakeIAGame);
-        players.add(new SnakeBody(Color.GOLD));
+        players.add(new SnakeBody(Color.GOLD,5,200,200));
 
 
         for (int i = 0; i < 20; i++) {
@@ -61,18 +60,10 @@ public class Game {
             eaten=false;
             numFood++;
         }
-
-        public FoodCords(double x, double y) {
-            this.x = x;
-            this.y = y;
-            foodgraph=SnakeFactory.createFood(x,y);
-        }
         public boolean isOverlap (SnakeCell head) {
             if (head == null) return false;
 
-            double d = Math.sqrt((head.getX() - this.x) * (head.getX() - x))
-                    + (head.getY() - y) * (head.getY() - y);
-            return d <= 50;
+            return Math.abs(this.x- head.getX())<10 && Math.abs(this.y- head.getY())<10;
         }
         public void removeGraph() {
             if (grid.getChildren().contains(foodgraph)){
@@ -100,33 +91,64 @@ public class Game {
     }
 
     public synchronized void move(SnakeDirection direction, SnakeBody s) {
+        s.getHead().move(direction);
+        handleFood(s);
+        handleCollision(s);
+
+    }
+
+    private void handleFood (SnakeBody s) {
         try {
-            s.getHead().move(direction);
-        List<FoodCords> newFoods = new ArrayList<>();
-        Iterator<FoodCords> iterator = foods.iterator();
-        while (iterator.hasNext()) {
-            FoodCords foodCords = iterator.next();
-            if (foodCords.isOverlap(s.getHead()) && !foodCords.isEaten()) {
-                foodCords.setEaten(true);
-                Platform.runLater(new Runnable (){
-                    @Override
-                    public void run() {
-                        foodCords.removeGraph();
-                        grid.getChildren().add(s.growSnake(s.getHead().color));
-                    }
-                });
-                
-                iterator.remove();
-                break;
+            List<FoodCords> newFoods = new ArrayList<>();
+            Iterator<FoodCords> iterator = foods.iterator();
+            while (iterator.hasNext()) {
+                FoodCords foodCords = iterator.next();
+                if (foodCords.isOverlap(s.getHead()) && !foodCords.isEaten()) {
+                    foodCords.setEaten(true);
+                    Platform.runLater(new Runnable (){
+                        @Override
+                        public void run() {
+                            foodCords.removeGraph();
+                            grid.getChildren().add(s.growSnake(s.getHead().getColor()));
+                        }
+                    });
+
+                    iterator.remove();
+                    break;
+                }
             }
-        }
-    
-        foods.addAll(newFoods);
-            
+
+            foods.addAll(newFoods);
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
+
+    private void handleCollision (SnakeBody s) {
+        double headX = s.getHead().getX();
+        double headY = s.getHead().getY();
+        for (SnakeBody snakeBody : players) {
+            for (SnakeCell snakeCell : snakeBody.getBody()) {
+                if (snakeCell.getColor().equals(s.getHead().getColor())) {continue;}
+                if (Math.abs(snakeCell.getX()-headX)<10 && Math.abs(snakeCell.getY()-headY)<10) {
+                    Platform.runLater(new Runnable (){
+                        @Override
+                        public void run() {
+                            System.out.println("reached");
+                            s.respawnSnake(4);
+                        }
+                    });
+
+                }
+            }
+        }
+    }
+
+
+
+
+
 
     Runnable moveRunnable = new Runnable() {
         public void run() {
@@ -187,7 +209,9 @@ public class Game {
         return grid;
     }
 
-
+    public List<SnakeBody> getPlayers() {
+        return players;
+    }
 
 
 }
