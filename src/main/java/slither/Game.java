@@ -1,11 +1,11 @@
 package slither;
 
 import javafx.application.Platform;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import slither.cells.SnakeCell;
-
+import javafx.animation.AnimationTimer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -13,13 +13,16 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import slither.Game.FoodCords;
+import slither.cells.*;
+
+
 public class Game {
     private AnchorPane grid;
 
 
     private final List<SnakeBody> players;
     private ArrayList<FoodCords> foods = new ArrayList<>();
-
 
     public Game() {
 
@@ -44,6 +47,23 @@ public class Game {
                 current = current.getNext();
             }
         }
+
+        Pos mousePosition = new Pos(0, 0);
+        grid.setOnMouseMoved(event -> {
+            mousePosition.setPos(event.getX(), event.getY());
+        });
+
+        AnimationTimer timer = new AnimationTimer() {
+            private long lastUpdate = 0 ;
+            @Override
+            public void handle(long now) {
+                if (now - lastUpdate >= 50_000_000) {
+                if(players.get(0).getHead()!=null){
+                    players.get(0).getHead().setAngle(mousePosition);
+                }}
+            }
+        };
+        timer.start();
     }
 
     public class FoodCords {
@@ -89,10 +109,22 @@ public class Game {
         return foodCords;
     }
 
-    public synchronized void move(SnakeDirection direction, SnakeBody s) {
-        s.getHead().moveHead(direction);
+
+
+    public void move (SnakeBody s){
+        Platform.runLater(()->
+        {s.getHead().moveHead();
+            handleFood(s);
+            handleCollision(s);});
+        }
+        
+
+    public void moveIA(Pos food, SnakeBody s) {
+        Platform.runLater(()->
+        {s.getHead().moveHeadIA(food);
         handleFood(s);
-        handleCollision(s);
+        handleCollision(s);}
+        );
 
     }
 
@@ -151,10 +183,10 @@ public class Game {
 
     Runnable moveRunnable = new Runnable() {
         public void run() {
-            
+            synchronized (players){
             for (SnakeBody snake : players ) {
-                if (snake.equals(players.get(1))) { move(directionIA(),players.get(1)); continue; }
-                move(snake.getSnakeDirection(),snake);
+                if (!snake.equals(players.get(0))) { moveIA(getClosestFood(snake),snake); continue; }
+                move(snake);
                 if(FoodCords.numFood<20) {
                     Platform.runLater(new Runnable (){
                         @Override
@@ -165,7 +197,7 @@ public class Game {
                     
                 }
 
-            }
+            }}
 
         }
     };
@@ -173,43 +205,53 @@ public class Game {
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
 
-    public synchronized FoodCords getClosestFood(SnakeBody s){
-        SnakeCell head = s.getHead();
-        FoodCords closestFood = foods.get(0);
-        double minDistance = Math.sqrt((head.getX() - closestFood.x) * (head.getX() - closestFood.x))
-                + (head.getY() - closestFood.y) * (head.getY() - closestFood.y);
-        for (FoodCords food : foods) {
-            double distance = Math.sqrt((head.getX() - food.x) * (head.getX() - food.x))
-                    + (head.getY() - food.y) * (head.getY() - food.y);
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestFood = food;
+    public synchronized Pos getClosestFood(SnakeBody s){
+        synchronized(foods){
+            if (foods.isEmpty()) return null;
+            SnakeCell head = s.getHead();
+        
+            FoodCords closestFood = foods.get(0);
+            double minDistance = Math.sqrt((head.getX() - closestFood.x) * (head.getX() - closestFood.x))
+                    + (head.getY() - closestFood.y) * (head.getY() - closestFood.y);
+            for (FoodCords food : foods) {
+                double distance = Math.sqrt((head.getX() - food.x) * (head.getX() - food.x))
+                        + (head.getY() - food.y) * (head.getY() - food.y);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestFood = food;
+                }
             }
+            return new Pos(closestFood.x,closestFood.y);
         }
-        return closestFood;
     }
 
-    public SnakeDirection directionIA(){
-        SnakeCell headIA = players.get(1).getHead();
-        FoodCords food = getClosestFood(players.get(1));
-        if (headIA.getX() < food.x-5) {
-            return SnakeDirection.RIGHT;
-        } else if (headIA.getX() > food.x+5) {
-            return SnakeDirection.LEFT;
-        } else if (headIA.getY() < food.y-5) {
-           return SnakeDirection.DOWN;
-        } else if (headIA.getY() > food.y+5) {
-           return SnakeDirection.UP;
-        }
-        else return SnakeDirection.NONE;
-    }
+    // public SnakeDirection directionIA(){
+    //     synchronized (players){
+            
+    //             SnakeCell headIA = players.get(1).getHead();
+    //             FoodCords food = getClosestFood(players.get(1));
+    //             if (headIA.getX() < food.x-5) {
+    //                 return SnakeDirection.RIGHT;
+    //             } else if (headIA.getX() > food.x+5) {
+    //                 return SnakeDirection.LEFT;
+    //             } else if (headIA.getY() < food.y-5) {
+    //             return SnakeDirection.DOWN;
+    //             } else if (headIA.getY() > food.y+5) {
+    //             return SnakeDirection.UP;
+    //             }
+    //             else return SnakeDirection.NONE;
+    //         }
+        
+    // }
 
     public AnchorPane getGrid() {
         return grid;
     }
 
     public List<SnakeBody> getPlayers() {
-        return players;
+        synchronized (players){
+            return players;
+        }
     }
 
 

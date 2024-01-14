@@ -1,5 +1,6 @@
 package slither.cells;
 
+import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -11,14 +12,32 @@ public abstract class SnakeCell extends Circle {
     private Color color;
     private SnakeCell next;
     private SnakeCell prev;
+    private double angle;
 
     public SnakeCell (int n) {
         super(n);
-        speed= 5.0;
-    }
+        speed= 2.5;
+        angle=-Math.PI/2;}
 
     public void setNext(SnakeCell next) {
         this.next = next;
+    }
+
+    public void setAngle(Pos p) {
+        double angle= Math.atan2(p.getY()-this.getY(),p.getX()-this.getX());
+        double diff = angle - this.angle;
+        double maxDiff = Math.toRadians(5);
+
+        if (Math.abs(diff) < maxDiff) {
+            this.angle = angle;
+        }
+        else{
+            if (diff > maxDiff) {
+                this.angle = this.angle + maxDiff;
+            } else{
+                this.angle = this.angle - maxDiff;
+            }
+        }
     }
 
     public void setPrev(SnakeCell prev) {
@@ -43,59 +62,37 @@ public abstract class SnakeCell extends Circle {
     public void setX(double x) {this.setCenterX(x);}
     public void setY(double y) {this.setCenterY(y);}
 
-    public void moveHead(SnakeDirection direction) {
-        SnakeDirection validDir;
-        double prevx = this.getCenterX();
-        double prevy = this.getCenterY();
-        if (validMove(direction)) validDir = direction;
-        else validDir = oppositeMove(direction);
-        switch (validDir) {
-            case UP:
-                if (this.getCenterY() <= 0) {
-                    setCenterY(790);
-                } else {
-                    setCenterY(this.getCenterY() - speed);
-                }
-                break;
-            case DOWN:
-                if (this.getCenterY() >= 790) {
-                    setCenterY(0);
-                } else {
-                    setCenterY(this.getCenterY() + speed);
-                }
-                break;
-            case LEFT:
-                if (this.getCenterX() <= 0) {
-                    setCenterX(790);
-                } else {
-                    setCenterX(this.getCenterX() - speed);
-                }
-                break;
-            case RIGHT:
-                if (this.getCenterX() >= 790) {
-                    setCenterX(0);
-                } else {
-                    setCenterX(this.getCenterX() + speed);
-                }
-                break;
-            default:
-                break;
+    public void moveHead(){
+        double dx = speed * Math.cos(angle);
+        double dy = speed * Math.sin(angle);
+        double newx= this.getX()+dx;
+        double newy= this.getY()+dy;
+        if (newx > 800) {
+            newx = 0;
+        } else if (newx < 0) {
+            newx = 800;
         }
-        if (next != null) {
-            next.moveBody(prevx,prevy);
+        if (newy > 800) {
+            newy = 0;
+        } else if (newy < 0) {
+            newy = 800;
         }
+        moveBody(newx, newy);
+    }
 
-        prevDirection = validDir;
-
+    public void moveHeadIA(Pos p) {
+        setAngle(p);
+        moveHead();
     }
 
     public void moveBody(double x, double y) {
-        if (next != null) {
-            next.moveBody(this.getCenterX(),this.getCenterY());
+        Platform.runLater(() -> {
+            if (next != null) {
+                next.moveBody(this.getCenterX(),this.getCenterY());
+            }
+            this.setCenterX(x);
+            this.setCenterY(y);});
         }
-        this.setCenterX(x);
-        this.setCenterY(y);
-    }
 
     public void increaseSpeed() {
         speed += 0.5;
@@ -136,10 +133,16 @@ public abstract class SnakeCell extends Circle {
     }
 
     public void destroy() {
-        if (getParent()!=null) {
+        Platform.runLater(() -> {
+        if (getParent() != null) {
             Pane parentPane = (Pane) getParent();
             parentPane.getChildren().remove(this);
         }
+    });
+    }
+
+    public Pos getPos() {
+        return new Pos(this.getX(),this.getY());
     }
 
 }
