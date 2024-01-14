@@ -3,4 +3,6 @@ module dsdb.slither {
     requires java.desktop;
     exports slither;
     exports slither.cells;
+    exports slither.cells.snakecells;
+    exports slither.cells.foodcells;
 }

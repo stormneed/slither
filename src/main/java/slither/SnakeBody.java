@@ -3,12 +3,11 @@ package slither;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import slither.cells.SnakeCell;
-import slither.cells.SnakeCellBase;
-import slither.cells.SnakeCellWeak;
+import slither.cells.snakecells.SnakeCell;
+import slither.cells.snakecells.SnakeCellBase;
+import slither.cells.snakecells.SnakeCellWeak;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class SnakeBody {
@@ -54,6 +53,17 @@ public class SnakeBody {
     public synchronized SnakeCell growSnake (Color playerColor) {
         SnakeCell newTail;
         newTail = new SnakeCellBase(tail.getX(), (tail.getY()+5)%800,playerColor);
+        body.add(newTail);
+        SnakeCell temp = tail;
+        temp.setNext(newTail);
+        tail = newTail;
+        tail.setPrev(temp);
+        return newTail;
+    }
+
+    public synchronized SnakeCell growSnakeWeak () {
+        SnakeCell newTail;
+        newTail = new SnakeCellWeak(tail.getX(), (tail.getY())%800);
         body.add(newTail);
         SnakeCell temp = tail;
         temp.setNext(newTail);

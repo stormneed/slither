@@ -38,7 +38,13 @@ public class Menu extends Application {
         AnchorPane root= game.getGrid();
         root.setPrefSize(800,800);
         Scene scene = new Scene(root);
-        game.executor.scheduleAtFixedRate(game.moveRunnable, 0,20, TimeUnit.MILLISECONDS);
+        game.executor.scheduleAtFixedRate(() -> {
+            try {
+                game.moveRunnable.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 0, 20, TimeUnit.MILLISECONDS);
         Stage stage = new Stage();
         stage.setTitle("Snake");
         stage.setScene(scene);

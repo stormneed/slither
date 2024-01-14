@@ -1,9 +1,10 @@
-package slither.cells;
+package slither.cells.snakecells;
 
 import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import slither.cells.Pos;
 
 import java.util.List;
 
@@ -68,7 +69,7 @@ public abstract class SnakeCell extends Circle {
         } else if (angleDiff < -180) {
             angleDiff += 360;
         }
-        System.out.println(angleDiff);
+
         
         if (angleDiff >= ANGLE_LIMIT) {
             angle += ANGLE_LIMIT;

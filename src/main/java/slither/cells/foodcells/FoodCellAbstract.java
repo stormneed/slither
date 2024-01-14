@@ -1,7 +1,6 @@
-package slither.cells;
-import javafx.scene.paint.Color;
+package slither.cells.foodcells;
 import javafx.scene.shape.Circle;
-
+import slither.cells.snakecells.SnakeCell;
 
 
 public abstract class FoodCellAbstract extends Circle{
@@ -9,8 +8,8 @@ public abstract class FoodCellAbstract extends Circle{
     public static int numFood=0;
     public boolean eaten= false;
 
-    public FoodCellAbstract(double x, double y, int weight) {
-        super(5);
+    public FoodCellAbstract(double d, double x, double y, int weight) {
+        super(d);
         this.setCenterX(x);
         this.setCenterY(y);
         this.weight = weight;

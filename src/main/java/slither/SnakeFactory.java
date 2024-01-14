@@ -3,8 +3,6 @@ package slither;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import slither.cells.SnakeCell;
-import slither.cells.SnakeCellBase;
 
 public class SnakeFactory {
     public static Pane createEmptySpace() {

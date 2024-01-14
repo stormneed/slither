@@ -1,4 +1,4 @@
-package slither.cells;
+package slither.cells.snakecells;
 
 import javafx.scene.paint.Color;
 
