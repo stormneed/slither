@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import slither.cells.foodcells.DeathFood;
+import slither.cells.foodcells.PoisonedDeathFood;
 import slither.cells.snakecells.SnakeCell;
 import slither.cells.snakecells.SnakeCellBase;
 import slither.cells.snakecells.SnakeCellPoison;
@@ -54,7 +55,7 @@ public class SnakeBody {
     }
 
     // A tester si il peut grandir hors bordure
-    public synchronized SnakeCell growSnake (Color playerColor) {
+    public SnakeCell growSnake (Color playerColor) {
         SnakeCell newTail;
         newTail = new SnakeCellBase(tail.getX(), (tail.getY())%800,playerColor);
         body.add(newTail);
@@ -65,7 +66,7 @@ public class SnakeBody {
         return newTail;
     }
 
-    public synchronized SnakeCell growSnakeWeak () {
+    public SnakeCell growSnakeWeak () {
         SnakeCell newTail;
         newTail = new SnakeCellWeak(tail.getX(), (tail.getY())%800);
         body.add(newTail);
@@ -76,7 +77,7 @@ public class SnakeBody {
         return newTail;
     }
 
-    public synchronized SnakeCell growSnakePoison () {
+    public SnakeCell growSnakePoison () {
         SnakeCell newTail;
         newTail = new SnakeCellPoison(tail.getX(), (tail.getY())%800);
         body.add(newTail);
@@ -113,14 +114,18 @@ public class SnakeBody {
             }
         }
         ArrayList<DeathFood> deathFood = new ArrayList<>();
-        // Platform.runLater(()->{
+        DeathFood deathFoodCell;
             for (int i = 0; i<destroyed.size(); i+=3) {
-                SnakeCell snakeCell = destroyed.get(i);
-                DeathFood deathFoodCell = new DeathFood(snakeCell.getX(),snakeCell.getY());
+                                SnakeCell snakeCell = destroyed.get(i);
+                if (snakeCell instanceof SnakeCellPoison) {
+                    deathFoodCell = new PoisonedDeathFood(snakeCell.getX(),snakeCell.getY());
+                }
+                else {
+                    deathFoodCell= new DeathFood(snakeCell.getX(),snakeCell.getY());
+                }   
                 deathFood.add(deathFoodCell);
                 parentPane.getChildren().add(deathFoodCell);
             }
-        // });
 
         body = new ArrayList<>();
         SnakeCell prevCell = head;

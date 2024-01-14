@@ -19,6 +19,7 @@ import slither.cells.*;
 import slither.cells.foodcells.BasicFood;
 import slither.cells.foodcells.DeathFood;
 import slither.cells.foodcells.FoodCellAbstract;
+import slither.cells.foodcells.PoisonFood;
 import slither.cells.foodcells.PoisonedDeathFood;
 import slither.cells.foodcells.SpeedFood;
 import slither.cells.foodcells.WeakFood;
@@ -64,46 +65,9 @@ public class Game {
         });
     }
 
-    // public class FoodCords {
-
-    //     private Circle foodgraph;
-    //     private boolean eaten;
-    //     private double x,y;
-    //     public static int numFood=0;
-    //     public FoodCords(double x, double y, Circle foodgraph) {
-    //         this.x = x;
-    //         this.y = y;
-    //         this.foodgraph=foodgraph;
-    //         eaten=false;
-    //         numFood++;
-    //     }
-    //     public boolean isOverlap (SnakeCell head) {
-    //         if (head == null) return false;
-
-    //         return Math.abs(this.x- head.getX())<10 && Math.abs(this.y- head.getY())<10;
-    //     }
-
-    //     public void removeGraph() {
-    //         if (grid.getChildren().contains(foodgraph)){
-    //         grid.getChildren().remove(foodgraph);
-    //         numFood--;
-    //         }
-    //     }
-
-    //     public boolean isEaten() {
-    //         return eaten;
-    //     }
-
-    //     public void setEaten(boolean eaten) {
-    //         this.eaten = eaten;
-    //     }
-    // }
-
     public FoodCellAbstract generateFood () {
         double x = new Random().nextInt(800);
         double y = new Random().nextInt(800);
-//        double x = 100;
-//        double y = 100;
 
         int r = new Random().nextInt(100);
 
@@ -117,6 +81,9 @@ public class Game {
         }
         else if (r<9) {
             foodCords = new SpeedFood(x,y,1,false);
+        }
+        else if (r<12) {
+            foodCords = new PoisonFood(x,y);
         }
         else {
             foodCords = new BasicFood(x,y,1);
@@ -176,6 +143,11 @@ public class Game {
                                     }
                                     else {
                                         s.getHead().decreaseSpeed();
+                                    }
+                                }
+                                else if (foodCords instanceof PoisonFood) {
+                                    for (int i = 0; i<3; i++) {
+                                        grid.getChildren().add(s.growSnakePoison());
                                     }
                                 }
                                 else {

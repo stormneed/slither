@@ -6,8 +6,8 @@ public class SnakeCellPoison extends SnakeCell{
 
     public SnakeCellPoison(double x, double y) {
         super(5);
-        this.setFill(Color.PURPLE);
-        this.setStroke(Color.DARKRED);
+        this.setFill(Color.BLACK);
+        this.setStrokeWidth(2);
         this.setCenterX(x);
         this.setCenterY(y);
     }

@@ -11,6 +11,7 @@ public class SnakeCellBase extends SnakeCell {
         this.setCenterX(x);
         this.setCenterY(y);
         this.setColor(c);
+
     }
     public SnakeCellBase(double x, double y, Color c, boolean outline) {
         super(5);
