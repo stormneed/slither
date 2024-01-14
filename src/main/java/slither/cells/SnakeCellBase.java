@@ -1,6 +1,7 @@
 package slither.cells;
 
-import javafx.scene.paint.Color;
+import javafx.scene.paint.*;
+
 
 public class SnakeCellBase extends SnakeCell {
 

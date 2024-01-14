@@ -1,19 +1,16 @@
 package slither;
 
 import javafx.application.Platform;
-import javafx.scene.input.MouseEvent;
+
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.animation.AnimationTimer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
-import slither.Game.FoodCords;
 import slither.cells.*;
 
 
@@ -22,7 +19,7 @@ public class Game {
 
     private Pos mousePosition;
     private final List<SnakeBody> players;
-    private ArrayList<FoodCords> foods = new ArrayList<>();
+    private ArrayList<FoodCellAbstract> foods = new ArrayList<>();
 
     public Game() {
 
@@ -54,46 +51,46 @@ public class Game {
         });
     }
 
-    public class FoodCords {
+    // public class FoodCords {
 
-        private Circle foodgraph;
-        private boolean eaten;
-        private double x,y;
-        public static int numFood=0;
-        public FoodCords(double x, double y, Circle foodgraph) {
-            this.x = x;
-            this.y = y;
-            this.foodgraph=foodgraph;
-            eaten=false;
-            numFood++;
-        }
-        public boolean isOverlap (SnakeCell head) {
-            if (head == null) return false;
+    //     private Circle foodgraph;
+    //     private boolean eaten;
+    //     private double x,y;
+    //     public static int numFood=0;
+    //     public FoodCords(double x, double y, Circle foodgraph) {
+    //         this.x = x;
+    //         this.y = y;
+    //         this.foodgraph=foodgraph;
+    //         eaten=false;
+    //         numFood++;
+    //     }
+    //     public boolean isOverlap (SnakeCell head) {
+    //         if (head == null) return false;
 
-            return Math.abs(this.x- head.getX())<10 && Math.abs(this.y- head.getY())<10;
-        }
-        public void removeGraph() {
-            if (grid.getChildren().contains(foodgraph)){
-            grid.getChildren().remove(foodgraph);
-            numFood--;
-            }
-        }
+    //         return Math.abs(this.x- head.getX())<10 && Math.abs(this.y- head.getY())<10;
+    //     }
 
-        public boolean isEaten() {
-            return eaten;
-        }
+    //     public void removeGraph() {
+    //         if (grid.getChildren().contains(foodgraph)){
+    //         grid.getChildren().remove(foodgraph);
+    //         numFood--;
+    //         }
+    //     }
 
-        public void setEaten(boolean eaten) {
-            this.eaten = eaten;
-        }
-    }
+    //     public boolean isEaten() {
+    //         return eaten;
+    //     }
 
-    public FoodCords generateFood () {
+    //     public void setEaten(boolean eaten) {
+    //         this.eaten = eaten;
+    //     }
+    // }
+
+    public FoodCellAbstract generateFood () {
         double x = new Random().nextInt(800);
         double y = new Random().nextInt(800);
-        Circle a=SnakeFactory.createFood(x,y);
-        FoodCords foodCords = new FoodCords(x,y,a);
-        grid.getChildren().add(a);
+        FoodCellAbstract foodCords = new BasicFood(x,y,1);
+        grid.getChildren().add(foodCords);
         return foodCords;
     }
 
@@ -118,16 +115,17 @@ public class Game {
 
     private void handleFood (SnakeBody s) {
         try {
-            List<FoodCords> newFoods = new ArrayList<>();
-            Iterator<FoodCords> iterator = foods.iterator();
+            List<FoodCellAbstract> newFoods = new ArrayList<>();
+            Iterator<FoodCellAbstract> iterator = foods.iterator();
             while (iterator.hasNext()) {
-                FoodCords foodCords = iterator.next();
+                FoodCellAbstract foodCords = iterator.next();
                 if (foodCords.isOverlap(s.getHead()) && !foodCords.isEaten()) {
                     foodCords.setEaten(true);
+                    foods.remove(foodCords);
                     Platform.runLater(new Runnable (){
                         @Override
                         public void run() {
-                            foodCords.removeGraph();
+                            grid.getChildren().remove(foodCords);
                             grid.getChildren().add(s.growSnake(s.getHead().getColor()));
                         }
                     });
@@ -189,7 +187,7 @@ public class Game {
             for (SnakeBody snake : players ) {
                 if (!snake.equals(players.get(0))) { moveIA(getClosestFood(snake),snake); continue; }
                 move(snake);
-                if(FoodCords.numFood<20) {
+                if(FoodCellAbstract.numFood<20) {
                     Platform.runLater(new Runnable (){
                         @Override
                         public void run() {
@@ -212,39 +210,20 @@ public class Game {
             if (foods.isEmpty()) return null;
             SnakeCell head = s.getHead();
         
-            FoodCords closestFood = foods.get(0);
-            double minDistance = Math.sqrt((head.getX() - closestFood.x) * (head.getX() - closestFood.x))
-                    + (head.getY() - closestFood.y) * (head.getY() - closestFood.y);
-            for (FoodCords food : foods) {
-                double distance = Math.sqrt((head.getX() - food.x) * (head.getX() - food.x))
-                        + (head.getY() - food.y) * (head.getY() - food.y);
+            FoodCellAbstract closestFood = foods.get(0);
+            double minDistance = Math.sqrt((head.getX() - closestFood.getCenterX()) * (head.getX() - closestFood.getCenterX()))
+                    + (head.getY() - closestFood.getCenterY()) * (head.getY() - closestFood.getCenterY());
+            for (FoodCellAbstract food : foods) {
+                double distance = Math.sqrt((head.getX() - food.getCenterX()) * (head.getX() - food.getCenterX()))
+                        + (head.getY() - food.getCenterY()) * (head.getY() - food.getCenterY());
                 if (distance < minDistance) {
                     minDistance = distance;
                     closestFood = food;
                 }
             }
-            return new Pos(closestFood.x,closestFood.y);
+            return new Pos(closestFood.getCenterX(),closestFood.getCenterY());
         }
     }
-
-    // public SnakeDirection directionIA(){
-    //     synchronized (players){
-            
-    //             SnakeCell headIA = players.get(1).getHead();
-    //             FoodCords food = getClosestFood(players.get(1));
-    //             if (headIA.getX() < food.x-5) {
-    //                 return SnakeDirection.RIGHT;
-    //             } else if (headIA.getX() > food.x+5) {
-    //                 return SnakeDirection.LEFT;
-    //             } else if (headIA.getY() < food.y-5) {
-    //             return SnakeDirection.DOWN;
-    //             } else if (headIA.getY() > food.y+5) {
-    //             return SnakeDirection.UP;
-    //             }
-    //             else return SnakeDirection.NONE;
-    //         }
-        
-    // }
 
     public AnchorPane getGrid() {
         return grid;
