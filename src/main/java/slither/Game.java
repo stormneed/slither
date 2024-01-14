@@ -20,7 +20,7 @@ import slither.cells.*;
 public class Game {
     private AnchorPane grid;
 
-
+    private Pos mousePosition;
     private final List<SnakeBody> players;
     private ArrayList<FoodCords> foods = new ArrayList<>();
 
@@ -48,22 +48,10 @@ public class Game {
             }
         }
 
-        Pos mousePosition = new Pos(0, 0);
+        mousePosition = new Pos(0, 0);
         grid.setOnMouseMoved(event -> {
             mousePosition.setPos(event.getX(), event.getY());
         });
-
-        AnimationTimer timer = new AnimationTimer() {
-            private long lastUpdate = 0 ;
-            @Override
-            public void handle(long now) {
-                if (now - lastUpdate >= 50_000_000) {
-                if(players.get(0).getHead()!=null){
-                    players.get(0).getHead().setAngle(mousePosition);
-                }}
-            }
-        };
-        timer.start();
     }
 
     public class FoodCords {
@@ -113,7 +101,7 @@ public class Game {
 
     public void move (SnakeBody s){
         Platform.runLater(()->
-        {s.getHead().moveHead();
+        {s.getHead().moveHead(mousePosition);
             handleFood(s);
             handleCollision(s);});
         }

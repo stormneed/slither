@@ -7,6 +7,7 @@ import javafx.scene.shape.Circle;
 import slither.SnakeDirection;
 
 public abstract class SnakeCell extends Circle {
+    private static final double ANGLE_LIMIT = 5.0;
     private double speed;
     private SnakeDirection prevDirection;
     private Color color;
@@ -21,23 +22,6 @@ public abstract class SnakeCell extends Circle {
 
     public void setNext(SnakeCell next) {
         this.next = next;
-    }
-
-    public void setAngle(Pos p) {
-        double angle= Math.atan2(p.getY()-this.getY(),p.getX()-this.getX());
-        double diff = angle - this.angle;
-        double maxDiff = Math.toRadians(5);
-
-        if (Math.abs(diff) < maxDiff) {
-            this.angle = angle;
-        }
-        else{
-            if (diff > maxDiff) {
-                this.angle = this.angle + maxDiff;
-            } else{
-                this.angle = this.angle - maxDiff;
-            }
-        }
     }
 
     public void setPrev(SnakeCell prev) {
@@ -62,36 +46,66 @@ public abstract class SnakeCell extends Circle {
     public void setX(double x) {this.setCenterX(x);}
     public void setY(double y) {this.setCenterY(y);}
 
-    public void moveHead(){
-        double dx = speed * Math.cos(angle);
-        double dy = speed * Math.sin(angle);
-        double newx= this.getX()+dx;
-        double newy= this.getY()+dy;
-        if (newx > 800) {
-            newx = 0;
-        } else if (newx < 0) {
-            newx = 800;
+    public void moveHead(Pos p){
+        double deltaX = p.getX() - this.getX();
+        double deltaY = p.getY() - this.getY();
+    
+        double targetAngle = Math.toDegrees(Math.atan2(deltaY, deltaX));
+    
+        // Ensure the target angle is in the range [0, 360]
+        if (targetAngle < -180) {
+            targetAngle += 360;
         }
-        if (newy > 800) {
-            newy = 0;
-        } else if (newy < 0) {
-            newy = 800;
+
+        if (targetAngle > 180) {
+            targetAngle -= 360;
         }
-        moveBody(newx, newy);
+        
+        // Adjust the angle smoothly within the specified limit
+        double angleDiff = targetAngle - angle;
+        if (angleDiff > 180) {
+            angleDiff -= 360;
+        } else if (angleDiff < -180) {
+            angleDiff += 360;
+        }
+        System.out.println(angleDiff);
+        
+        if (angleDiff >= ANGLE_LIMIT) {
+            angle += ANGLE_LIMIT;
+        } else if (angleDiff <= -ANGLE_LIMIT) {
+            angle -= ANGLE_LIMIT;
+        } else {
+            angle =targetAngle;
+        }
+    
+        double newX = speed * Math.cos(Math.toRadians(angle)) + this.getX();
+        double newY = speed * Math.sin(Math.toRadians(angle)) + this.getY();
+    
+        if (newX > 800) {
+            newX = 0;
+        } else if (newX < 0) {
+            newX = 800;
+        }
+        if (newY > 800) {
+            newY = 0;
+        } else if (newY < 0) {
+            newY = 800;
+        }
+        moveBody(newX, newY);
     }
 
     public void moveHeadIA(Pos p) {
-        setAngle(p);
-        moveHead();
+        // setAngle(p);
+        moveHead(p);
     }
 
     public void moveBody(double x, double y) {
         Platform.runLater(() -> {
             if (next != null) {
-                next.moveBody(this.getCenterX(),this.getCenterY());
+                next.moveBody(this.getX(),this.getY());
             }
-            this.setCenterX(x);
-            this.setCenterY(y);});
+            this.setX(x);
+            this.setY(y);});
         }
 
     public void increaseSpeed() {
