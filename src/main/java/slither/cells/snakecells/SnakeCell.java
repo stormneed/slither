@@ -15,6 +15,7 @@ public abstract class SnakeCell extends Circle {
     private SnakeCell next;
     private SnakeCell prev;
     private double angle;
+    private boolean immune;
 
     public SnakeCell (int n) {
         super(n);
@@ -46,6 +47,14 @@ public abstract class SnakeCell extends Circle {
     }
     public void setX(double x) {this.setCenterX(x);}
     public void setY(double y) {this.setCenterY(y);}
+
+    public boolean isImmune() {
+        return immune;
+    }
+
+    public void changeImmune() {
+        immune=!immune;
+    }
 
     public void moveHead(Pos p){
         double deltaX = p.getX() - this.getX();
@@ -101,12 +110,15 @@ public abstract class SnakeCell extends Circle {
     }
 
     public void moveBody(double x, double y) {
+        double prevX = this.getX();
+        double prevY = this.getY();
         Platform.runLater(() -> {
-            if (next != null) {
-                next.moveBody(this.getX(),this.getY());
-            }
             this.setX(x);
-            this.setY(y);});
+            this.setY(y);
+            if (next != null) {
+                next.moveBody(prevX,prevY);
+            }
+            });
         }
 
     public void increaseSpeed() {

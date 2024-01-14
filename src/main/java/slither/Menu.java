@@ -44,7 +44,7 @@ public class Menu extends Application {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }, 0, 20, TimeUnit.MILLISECONDS);
+        }, 0, 30, TimeUnit.MILLISECONDS);
         Stage stage = new Stage();
         stage.setTitle("Snake");
         stage.setScene(scene);

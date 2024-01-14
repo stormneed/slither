@@ -1,13 +1,16 @@
 package slither;
 
 
+import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import slither.cells.foodcells.DeathFood;
 import slither.cells.snakecells.SnakeCell;
 import slither.cells.snakecells.SnakeCellBase;
 import slither.cells.snakecells.SnakeCellWeak;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class SnakeBody {
@@ -88,12 +91,25 @@ public class SnakeBody {
         return body;
     }
 
-    public void respawnSnake (int tailSize) {
+    public List<DeathFood> respawnSnake (int tailSize) {
+        Pane parentPane = (Pane) head.getParent();
+        ArrayList<SnakeCell> destroyed = new ArrayList<>();
         for (SnakeCell snakeCell : body) {
             if (!snakeCell.equals(head)) {
                 snakeCell.destroy();
+                destroyed.add(snakeCell);
             }
         }
+        ArrayList<DeathFood> deathFood = new ArrayList<>();
+        // Platform.runLater(()->{
+            for (int i = 0; i<destroyed.size(); i+=3) {
+                SnakeCell snakeCell = destroyed.get(i);
+                DeathFood deathFoodCell = new DeathFood(snakeCell.getX(),snakeCell.getY());
+                deathFood.add(deathFoodCell);
+                parentPane.getChildren().add(deathFoodCell);
+            }
+        // });
+
         body = new ArrayList<>();
         SnakeCell prevCell = head;
         int rx = new Random().nextInt(700);
@@ -108,10 +124,11 @@ public class SnakeBody {
             prevCell.setNext(bodyCell);
             bodyCell.setPrev(prevCell);
             prevCell = bodyCell;
-            Pane parentPane = (Pane) head.getParent();
+            
             parentPane.getChildren().add(bodyCell);
         }
         tail = prevCell;
+        return deathFood;
     }
 
     public void determineTail (SnakeCell cell) {
@@ -122,6 +139,7 @@ public class SnakeBody {
             this.tail = cell;
         }
     }
+
 
 
 
