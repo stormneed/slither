@@ -5,15 +5,16 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import slither.cells.SnakeCell;
 import slither.cells.SnakeCellBase;
+import slither.cells.SnakeCellWeak;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class SnakeBody {
     private final SnakeCell head;
     private SnakeCell tail;
     private ArrayList<SnakeCell> body = new ArrayList<>();
-    private SnakeDirection snakeDirection;
     public SnakeBody (Color playerColor, int tailSize, int x, int y) {
         head = new SnakeCellBase(x, y,playerColor,true);
         SnakeCell prevCell = head;
@@ -25,35 +26,35 @@ public class SnakeBody {
             prevCell = bodyCell;
         }
         tail = prevCell;
-        snakeDirection=SnakeDirection.UP;
+    }
+
+    public SnakeBody (Color playerColor, int tailSize, int x, int y, boolean vulnerability) {
+        head = new SnakeCellBase(x, y,playerColor,true);
+        SnakeCell prevCell = head;
+        for (int i = 0; i<tailSize; i++) {
+            SnakeCell bodyCell = new SnakeCellBase(x, y+5+(i*5),playerColor);
+            body.add(bodyCell);
+            prevCell.setNext(bodyCell);
+            bodyCell.setPrev(prevCell);
+            prevCell = bodyCell;
+            if (i == tailSize-1 && vulnerability) {
+                for (int j = 0; j<8;j++) {
+                    SnakeCell weakCell = new SnakeCellWeak(x, y+10+(i*5)+(j*5));
+                    body.add(weakCell);
+                    prevCell.setNext(weakCell);
+                    weakCell.setPrev(prevCell);
+                    prevCell = weakCell;
+                }
+            }
+        }
+        tail = prevCell;
     }
 
     // A tester si il peut grandir hors bordure
     public synchronized SnakeCell growSnake (Color playerColor) {
         SnakeCell newTail;
-        switch (tail.getPrevDirection()) {
-            case UP :
-                newTail = new SnakeCellBase(tail.getX(), (tail.getY()+5)%800,playerColor,tail);
-                body.add(newTail);
-                break;
-            case LEFT :
-                newTail = new SnakeCellBase((tail.getX()+5)%800, tail.getY(),playerColor,tail);
-                body.add(newTail);
-                break;
-            case DOWN :
-                newTail = new SnakeCellBase(tail.getX(), (tail.getY()-5)%800,playerColor,tail);
-                body.add(newTail);
-                break;
-            case RIGHT :
-                newTail = new SnakeCellBase((tail.getX()-5)%800, tail.getY(),playerColor,tail);
-                body.add(newTail);
-                break;
-            default:
-                newTail = new SnakeCellBase(tail.getX(), tail.getY(),playerColor,tail);
-                body.add(newTail);
-                break;
-
-        }
+        newTail = new SnakeCellBase(tail.getX(), (tail.getY()+5)%800,playerColor);
+        body.add(newTail);
         SnakeCell temp = tail;
         temp.setNext(newTail);
         tail = newTail;
@@ -73,13 +74,6 @@ public class SnakeBody {
         this.tail = tail;
     }
 
-    public SnakeDirection getSnakeDirection() {
-        return snakeDirection;
-    }
-    public void setSnakeDirection(SnakeDirection direction) {
-        this.snakeDirection=direction;
-    }
-
     public ArrayList<SnakeCell> getBody() {
         return body;
     }
@@ -96,13 +90,10 @@ public class SnakeBody {
         int x = rx - (rx % 10);
         int ry = new Random().nextInt(700);
         int y = ry - (ry % 10);
-        snakeDirection=SnakeDirection.UP;
-        head.setPrevDirection(SnakeDirection.UP);
         head.setX(x);
         head.setY(y);
         for (int i = 0; i<tailSize; i++) {
             SnakeCell bodyCell = new SnakeCellBase(x, y+5+(i*5),head.getColor());
-            bodyCell.setPrevDirection(SnakeDirection.UP);
             body.add(bodyCell);
             prevCell.setNext(bodyCell);
             bodyCell.setPrev(prevCell);
@@ -112,4 +103,16 @@ public class SnakeBody {
         }
         tail = prevCell;
     }
+
+    public void determineTail (SnakeCell cell) {
+        if (cell.getNext()!=null) {
+            determineTail(cell.getNext());
+        }
+        else {
+            this.tail = cell;
+        }
+    }
+
+
+
 }
