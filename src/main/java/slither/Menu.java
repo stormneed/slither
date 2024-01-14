@@ -39,25 +39,6 @@ public class Menu extends Application {
         root.setPrefSize(800,800);
         Scene scene = new Scene(root);
         game.executor.scheduleAtFixedRate(game.moveRunnable, 0,20, TimeUnit.MILLISECONDS);
-
-        scene.setOnKeyPressed(e -> {
-            switch (e.getCode()) {
-                case UP -> {game.getPlayers().get(0).setSnakeDirection(SnakeDirection.UP);}
-                case DOWN -> {game.getPlayers().get(0).setSnakeDirection(SnakeDirection.DOWN);}
-                case LEFT -> {game.getPlayers().get(0).setSnakeDirection(SnakeDirection.LEFT);}
-                case RIGHT -> {game.getPlayers().get(0).setSnakeDirection(SnakeDirection.RIGHT);}
-                case Z -> {game.getPlayers().get(2).setSnakeDirection(SnakeDirection.UP);}
-                case S -> {game.getPlayers().get(2).setSnakeDirection(SnakeDirection.DOWN);}
-                case Q -> {game.getPlayers().get(2).setSnakeDirection(SnakeDirection.LEFT);}
-                case D -> {game.getPlayers().get(2).setSnakeDirection(SnakeDirection.RIGHT);}
-            };
-
-
-
-
-
-
-        });
         Stage stage = new Stage();
         stage.setTitle("Snake");
         stage.setScene(scene);

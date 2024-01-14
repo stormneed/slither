@@ -28,12 +28,12 @@ public class Game {
 
         grid = new AnchorPane();
         grid.setPrefSize(800, 800);
-        SnakeBody snakeGame= new SnakeBody(Color.RED,6,600,600);
-        SnakeBody snakeIAGame= new SnakeBody(Color.BLUE,5,400,400);
+        SnakeBody snakeGame= new SnakeBody(Color.RED,10,600,600,true);
+        SnakeBody snakeIAGame= new SnakeBody(Color.BLUE,10,400,400,true);
         players=new ArrayList<>();
         players.add(snakeGame);
         players.add(snakeIAGame);
-        players.add(new SnakeBody(Color.GOLD,5,200,200));
+        players.add(new SnakeBody(Color.GOLD,10,200,200,true));
 
 
         for (int i = 0; i < 20; i++) {
@@ -159,18 +159,32 @@ public class Game {
     private void handleCollision (SnakeBody s) {
         double headX = s.getHead().getX();
         double headY = s.getHead().getY();
+        List<SnakeCell> destroyedCell = new ArrayList<>();
         for (SnakeBody snakeBody : players) {
             for (SnakeCell snakeCell : snakeBody.getBody()) {
                 if (snakeCell.getColor().equals(s.getHead().getColor())) {continue;}
                 if (Math.abs(snakeCell.getX()-headX)<10 && Math.abs(snakeCell.getY()-headY)<10) {
-                    Platform.runLater(new Runnable (){
+                    Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            System.out.println("reached");
-                            s.respawnSnake(4);
+                            if (snakeCell instanceof SnakeCellWeak) {
+                                snakeBody.setTail(snakeCell.getPrev());
+                                ((SnakeCellWeak) snakeCell).destroyWeakPoint(destroyedCell);
+                                snakeBody.getBody().removeAll(destroyedCell);
+                                for (SnakeCell snakeCells : snakeBody.getBody()) {
+                                    if (snakeCells.getNext()!=null && destroyedCell.contains(snakeCells.getNext())) {
+                                        snakeCells.setNext(null);
+                                    }
+                                }
+
+                                snakeBody.determineTail(snakeBody.getHead());
+                            }
+                            else if (snakeCell instanceof SnakeCellBase) {
+                                s.respawnSnake(10);
+                            }
+
                         }
                     });
-
                 }
             }
         }
@@ -253,6 +267,7 @@ public class Game {
             return players;
         }
     }
+
 
 
 }

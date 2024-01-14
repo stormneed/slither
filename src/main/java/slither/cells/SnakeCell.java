@@ -4,11 +4,11 @@ import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import slither.SnakeDirection;
+
+import java.util.List;
 
 public abstract class SnakeCell extends Circle {
     private double speed;
-    private SnakeDirection prevDirection;
     private Color color;
     private SnakeCell next;
     private SnakeCell prev;
@@ -102,28 +102,6 @@ public abstract class SnakeCell extends Circle {
         speed -= 0.5;
     }
 
-    private boolean validMove(SnakeDirection direction) {
-        return !prevDirection.equals(oppositeMove(direction));
-    }
-
-    private SnakeDirection oppositeMove (SnakeDirection direction) {
-        return switch (direction) {
-            case UP -> SnakeDirection.DOWN;
-            case LEFT -> SnakeDirection.RIGHT;
-            case DOWN -> SnakeDirection.UP;
-            case RIGHT -> SnakeDirection.LEFT;
-            default -> SnakeDirection.UP;
-        };
-    }
-
-    public SnakeDirection getPrevDirection() {
-        return prevDirection;
-    }
-
-    public void setPrevDirection(SnakeDirection prevDirection) {
-        this.prevDirection = prevDirection;
-    }
-
     public Color getColor() {
         return color;
     }
@@ -143,6 +121,14 @@ public abstract class SnakeCell extends Circle {
 
     public Pos getPos() {
         return new Pos(this.getX(),this.getY());
+    }
+
+    public void destroyFrom(List<SnakeCell> listCell) {
+        listCell.add(this);
+        if (next!=null) {
+            next.destroyFrom(listCell);
+        }
+        destroy();
     }
 
 }
