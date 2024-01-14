@@ -2,7 +2,7 @@ package slither.cells.snakecells;
 
 import javafx.scene.paint.Color;
 
-public class SnakeCellPoison extends SnakeCell{
+public class SnakeCellPoison extends SnakeCellAbstract {
 
     public SnakeCellPoison(double x, double y) {
         super(5);

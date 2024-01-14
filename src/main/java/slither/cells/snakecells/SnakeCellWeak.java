@@ -4,7 +4,7 @@ import javafx.scene.paint.Color;
 
 import java.util.List;
 
-public class SnakeCellWeak extends SnakeCell {
+public class SnakeCellWeak extends SnakeCellAbstract {
 
     private boolean marked;
     public SnakeCellWeak(double x, double y) {
@@ -17,7 +17,7 @@ public class SnakeCellWeak extends SnakeCell {
         this.marked = false;
     }
 
-    public void destroyWeakPoint (List<SnakeCell> listCell) {
+    public void destroyWeakPoint (List<SnakeCellAbstract> listCell) {
         if (getPrev()!=null && getPrev() instanceof SnakeCellWeak && !((SnakeCellWeak) getPrev()).marked) {
             this.marked = true;
             listCell.add(this);
