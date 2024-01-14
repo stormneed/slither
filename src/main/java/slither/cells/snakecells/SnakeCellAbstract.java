@@ -8,35 +8,35 @@ import slither.cells.Pos;
 
 import java.util.List;
 
-public abstract class SnakeCell extends Circle {
+public abstract class SnakeCellAbstract extends Circle {
     private static final double ANGLE_LIMIT = 5.0;
     private double speed;
     private Color color;
-    private SnakeCell next;
-    private SnakeCell prev;
+    private SnakeCellAbstract next;
+    private SnakeCellAbstract prev;
     private double angle;
     private boolean immune;
 
-    public SnakeCell (int n) {
+    public SnakeCellAbstract(int n) {
         super(n);
         speed= 2.5;
         angle=-Math.PI/2;}
 
-    public void setNext(SnakeCell next) {
+    public void setNext(SnakeCellAbstract next) {
         this.next = next;
     }
 
-    public void setPrev(SnakeCell prev) {
+    public void setPrev(SnakeCellAbstract prev) {
         this.prev = prev;
     }
     public void setPos(double x, double y) {
         this.setCenterX(x);
         this.setCenterY(y);
     }
-    public SnakeCell getNext() {
+    public SnakeCellAbstract getNext() {
         return next;
     }
-    public SnakeCell getPrev() {
+    public SnakeCellAbstract getPrev() {
         return prev;
     }
     public double getX() {
@@ -150,7 +150,7 @@ public abstract class SnakeCell extends Circle {
         return new Pos(this.getX(),this.getY());
     }
 
-    public void destroyFrom(List<SnakeCell> listCell) {
+    public void destroyFrom(List<SnakeCellAbstract> listCell) {
         listCell.add(this);
         if (next!=null) {
             next.destroyFrom(listCell);

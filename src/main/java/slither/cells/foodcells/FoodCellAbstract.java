@@ -1,6 +1,6 @@
 package slither.cells.foodcells;
 import javafx.scene.shape.Circle;
-import slither.cells.snakecells.SnakeCell;
+import slither.cells.snakecells.SnakeCellAbstract;
 
 
 public abstract class FoodCellAbstract extends Circle{
@@ -16,7 +16,7 @@ public abstract class FoodCellAbstract extends Circle{
         numFood++;
     }
 
-    public boolean isOverlap (SnakeCell head) {
+    public boolean isOverlap (SnakeCellAbstract head) {
         if (head == null) return false;
 
         return Math.abs(this.getCenterX()- head.getX())<10 && Math.abs(this.getCenterY()- head.getY())<10;

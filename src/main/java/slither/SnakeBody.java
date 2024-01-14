@@ -1,12 +1,11 @@
 package slither;
 
 
-import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import slither.cells.foodcells.DeathFood;
 import slither.cells.foodcells.PoisonedDeathFood;
-import slither.cells.snakecells.SnakeCell;
+import slither.cells.snakecells.SnakeCellAbstract;
 import slither.cells.snakecells.SnakeCellBase;
 import slither.cells.snakecells.SnakeCellPoison;
 import slither.cells.snakecells.SnakeCellWeak;
@@ -16,14 +15,14 @@ import java.util.List;
 import java.util.Random;
 
 public class SnakeBody {
-    private final SnakeCell head;
-    private SnakeCell tail;
-    private ArrayList<SnakeCell> body = new ArrayList<>();
+    private final SnakeCellAbstract head;
+    private SnakeCellAbstract tail;
+    private ArrayList<SnakeCellAbstract> body = new ArrayList<>();
     public SnakeBody (Color playerColor, int tailSize, int x, int y) {
         head = new SnakeCellBase(x, y,playerColor,true);
-        SnakeCell prevCell = head;
+        SnakeCellAbstract prevCell = head;
         for (int i = 0; i<tailSize; i++) {
-            SnakeCell bodyCell = new SnakeCellBase(x, y+5+(i*5),playerColor);
+            SnakeCellAbstract bodyCell = new SnakeCellBase(x, y+5+(i*5),playerColor);
             body.add(bodyCell);
             prevCell.setNext(bodyCell);
             bodyCell.setPrev(prevCell);
@@ -34,16 +33,16 @@ public class SnakeBody {
 
     public SnakeBody (Color playerColor, int tailSize, int x, int y, boolean vulnerability) {
         head = new SnakeCellBase(x, y,playerColor,true);
-        SnakeCell prevCell = head;
+        SnakeCellAbstract prevCell = head;
         for (int i = 0; i<tailSize; i++) {
-            SnakeCell bodyCell = new SnakeCellBase(x, y+5+(i*5),playerColor);
+            SnakeCellAbstract bodyCell = new SnakeCellBase(x, y+5+(i*5),playerColor);
             body.add(bodyCell);
             prevCell.setNext(bodyCell);
             bodyCell.setPrev(prevCell);
             prevCell = bodyCell;
             if (i == tailSize-1 && vulnerability) {
                 for (int j = 0; j<8;j++) {
-                    SnakeCell weakCell = new SnakeCellWeak(x, y+10+(i*5)+(j*5));
+                    SnakeCellAbstract weakCell = new SnakeCellWeak(x, y+10+(i*5)+(j*5));
                     body.add(weakCell);
                     prevCell.setNext(weakCell);
                     weakCell.setPrev(prevCell);
@@ -55,59 +54,59 @@ public class SnakeBody {
     }
 
     // A tester si il peut grandir hors bordure
-    public SnakeCell growSnake (Color playerColor) {
-        SnakeCell newTail;
+    public SnakeCellAbstract growSnake (Color playerColor) {
+        SnakeCellAbstract newTail;
         newTail = new SnakeCellBase(tail.getX(), (tail.getY())%800,playerColor);
         body.add(newTail);
-        SnakeCell temp = tail;
+        SnakeCellAbstract temp = tail;
         temp.setNext(newTail);
         tail = newTail;
         tail.setPrev(temp);
         return newTail;
     }
 
-    public SnakeCell growSnakeWeak () {
-        SnakeCell newTail;
+    public SnakeCellAbstract growSnakeWeak () {
+        SnakeCellAbstract newTail;
         newTail = new SnakeCellWeak(tail.getX(), (tail.getY())%800);
         body.add(newTail);
-        SnakeCell temp = tail;
+        SnakeCellAbstract temp = tail;
         temp.setNext(newTail);
         tail = newTail;
         tail.setPrev(temp);
         return newTail;
     }
 
-    public SnakeCell growSnakePoison () {
-        SnakeCell newTail;
+    public SnakeCellAbstract growSnakePoison () {
+        SnakeCellAbstract newTail;
         newTail = new SnakeCellPoison(tail.getX(), (tail.getY())%800);
         body.add(newTail);
-        SnakeCell temp = tail;
+        SnakeCellAbstract temp = tail;
         temp.setNext(newTail);
         tail = newTail;
         tail.setPrev(temp);
         return newTail;
     }
 
-    public SnakeCell getHead() {
+    public SnakeCellAbstract getHead() {
         return head;
     }
 
-    public SnakeCell getTail() {
+    public SnakeCellAbstract getTail() {
         return tail;
     }
 
-    public void setTail (SnakeCell tail) {
+    public void setTail (SnakeCellAbstract tail) {
         this.tail = tail;
     }
 
-    public ArrayList<SnakeCell> getBody() {
+    public ArrayList<SnakeCellAbstract> getBody() {
         return body;
     }
 
     public List<DeathFood> respawnSnake (int tailSize) {
         Pane parentPane = (Pane) head.getParent();
-        ArrayList<SnakeCell> destroyed = new ArrayList<>();
-        for (SnakeCell snakeCell : body) {
+        ArrayList<SnakeCellAbstract> destroyed = new ArrayList<>();
+        for (SnakeCellAbstract snakeCell : body) {
             if (!snakeCell.equals(head)) {
                 snakeCell.destroy();
                 destroyed.add(snakeCell);
@@ -116,7 +115,7 @@ public class SnakeBody {
         ArrayList<DeathFood> deathFood = new ArrayList<>();
         DeathFood deathFoodCell;
             for (int i = 0; i<destroyed.size(); i+=3) {
-                                SnakeCell snakeCell = destroyed.get(i);
+                                SnakeCellAbstract snakeCell = destroyed.get(i);
                 if (snakeCell instanceof SnakeCellPoison) {
                     deathFoodCell = new PoisonedDeathFood(snakeCell.getX(),snakeCell.getY());
                 }
@@ -128,7 +127,7 @@ public class SnakeBody {
             }
 
         body = new ArrayList<>();
-        SnakeCell prevCell = head;
+        SnakeCellAbstract prevCell = head;
         int rx = new Random().nextInt(700);
         int x = rx - (rx % 10);
         int ry = new Random().nextInt(700);
@@ -136,7 +135,7 @@ public class SnakeBody {
         head.setX(x);
         head.setY(y);
         for (int i = 0; i<tailSize; i++) {
-            SnakeCell bodyCell = new SnakeCellBase(x, y+5+(i*5),head.getColor());
+            SnakeCellAbstract bodyCell = new SnakeCellBase(x, y+5+(i*5),head.getColor());
             body.add(bodyCell);
             prevCell.setNext(bodyCell);
             bodyCell.setPrev(prevCell);
@@ -148,7 +147,7 @@ public class SnakeBody {
         return deathFood;
     }
 
-    public void determineTail (SnakeCell cell) {
+    public void determineTail (SnakeCellAbstract cell) {
         if (cell.getNext()!=null) {
             determineTail(cell.getNext());
         }

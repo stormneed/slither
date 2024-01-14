@@ -1,14 +1,11 @@
 package slither;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +20,7 @@ import slither.cells.foodcells.PoisonFood;
 import slither.cells.foodcells.PoisonedDeathFood;
 import slither.cells.foodcells.SpeedFood;
 import slither.cells.foodcells.WeakFood;
-import slither.cells.snakecells.SnakeCell;
+import slither.cells.snakecells.SnakeCellAbstract;
 import slither.cells.snakecells.SnakeCellBase;
 import slither.cells.snakecells.SnakeCellWeak;
 
@@ -52,7 +49,7 @@ public class Game {
         }
 
         for(SnakeBody s:players) {
-            SnakeCell current = s.getHead();
+            SnakeCellAbstract current = s.getHead();
             while (current != null) {
                 grid.getChildren().add(current);
                 current = current.getNext();
@@ -180,9 +177,9 @@ public class Game {
     private void handleCollision (SnakeBody s) {
         double headX = s.getHead().getX();
         double headY = s.getHead().getY();
-        List<SnakeCell> destroyedCell = new ArrayList<>();
+        List<SnakeCellAbstract> destroyedCell = new ArrayList<>();
         for (SnakeBody snakeBody : players) {
-            for (SnakeCell snakeCell : snakeBody.getBody()) {
+            for (SnakeCellAbstract snakeCell : snakeBody.getBody()) {
                 if (s.getBody().contains(snakeCell) || s.getHead().isImmune()) {continue;}
                 if (Math.abs(snakeCell.getX()-headX)<10 && Math.abs(snakeCell.getY()-headY)<10) {
                     s.getHead().changeImmune();
@@ -193,7 +190,7 @@ public class Game {
                                 snakeBody.setTail(snakeCell.getPrev());
                                 ((SnakeCellWeak) snakeCell).destroyWeakPoint(destroyedCell);
                                 snakeBody.getBody().removeAll(destroyedCell);
-                                for (SnakeCell snakeCells : snakeBody.getBody()) {
+                                for (SnakeCellAbstract snakeCells : snakeBody.getBody()) {
                                     if (snakeCells.getNext()!=null && destroyedCell.contains(snakeCells.getNext())) {
                                         snakeCells.setNext(null);
                                     }
@@ -262,7 +259,7 @@ public class Game {
     public synchronized Pos getClosestFood(SnakeBody s){
         synchronized(foods){
             if (foods.isEmpty()) return null;
-            SnakeCell head = s.getHead();
+            SnakeCellAbstract head = s.getHead();
         
             FoodCellAbstract closestFood = foods.get(0);
             double minDistance = Math.sqrt((head.getX() - closestFood.getCenterX()) * (head.getX() - closestFood.getCenterX()))

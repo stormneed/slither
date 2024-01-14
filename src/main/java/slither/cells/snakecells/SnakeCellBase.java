@@ -3,7 +3,7 @@ package slither.cells.snakecells;
 import javafx.scene.paint.*;
 
 
-public class SnakeCellBase extends SnakeCell {
+public class SnakeCellBase extends SnakeCellAbstract {
 
     public SnakeCellBase(double x, double y, Color c) {
         super(5);
