@@ -25,13 +25,8 @@ public abstract class SnakeCellAbstract extends Circle {
     public void setNext(SnakeCellAbstract next) {
         this.next = next;
     }
-
     public void setPrev(SnakeCellAbstract prev) {
         this.prev = prev;
-    }
-    public void setPos(double x, double y) {
-        this.setCenterX(x);
-        this.setCenterY(y);
     }
     public SnakeCellAbstract getNext() {
         return next;
@@ -146,9 +141,6 @@ public abstract class SnakeCellAbstract extends Circle {
     });
     }
 
-    public Pos getPos() {
-        return new Pos(this.getX(),this.getY());
-    }
 
     public void destroyFrom(List<SnakeCellAbstract> listCell) {
         listCell.add(this);
