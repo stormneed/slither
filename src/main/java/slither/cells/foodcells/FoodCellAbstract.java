@@ -15,17 +15,11 @@ public abstract class FoodCellAbstract extends Circle{
         this.weight = weight;
         numFood++;
     }
-
     public boolean isOverlap (SnakeCellAbstract head) {
         if (head == null) return false;
 
         return Math.abs(this.getCenterX()- head.getX())<10 && Math.abs(this.getCenterY()- head.getY())<10;
     }
-
-    public int getWeight() {
-        return weight;
-    }
-
     public boolean isEaten() {
         return eaten;
     }

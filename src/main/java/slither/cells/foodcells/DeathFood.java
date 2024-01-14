@@ -6,7 +6,7 @@ public class DeathFood extends FoodCellAbstract {
 
     public DeathFood(double x, double y) {
         super(3,x, y, 2);
-        this.setFill(Color.BLACK);
+        this.setFill(Color.LIGHTPINK);
         this.setStroke(Color.PURPLE);
         this.setStrokeWidth(1);
     }

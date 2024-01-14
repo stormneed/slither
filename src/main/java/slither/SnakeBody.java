@@ -18,18 +18,6 @@ public class SnakeBody {
     private final SnakeCellAbstract head;
     private SnakeCellAbstract tail;
     private ArrayList<SnakeCellAbstract> body = new ArrayList<>();
-    public SnakeBody (Color playerColor, int tailSize, int x, int y) {
-        head = new SnakeCellBase(x, y,playerColor,true);
-        SnakeCellAbstract prevCell = head;
-        for (int i = 0; i<tailSize; i++) {
-            SnakeCellAbstract bodyCell = new SnakeCellBase(x, y+5+(i*5),playerColor);
-            body.add(bodyCell);
-            prevCell.setNext(bodyCell);
-            bodyCell.setPrev(prevCell);
-            prevCell = bodyCell;
-        }
-        tail = prevCell;
-    }
 
     public SnakeBody (Color playerColor, int tailSize, int x, int y, boolean vulnerability) {
         head = new SnakeCellBase(x, y,playerColor,true);
@@ -52,8 +40,6 @@ public class SnakeBody {
         }
         tail = prevCell;
     }
-
-    // A tester si il peut grandir hors bordure
     public SnakeCellAbstract growSnake (Color playerColor) {
         SnakeCellAbstract newTail;
         newTail = new SnakeCellBase(tail.getX(), (tail.getY())%800,playerColor);
@@ -89,10 +75,6 @@ public class SnakeBody {
 
     public SnakeCellAbstract getHead() {
         return head;
-    }
-
-    public SnakeCellAbstract getTail() {
-        return tail;
     }
 
     public void setTail (SnakeCellAbstract tail) {

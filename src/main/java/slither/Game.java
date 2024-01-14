@@ -26,12 +26,12 @@ import slither.cells.snakecells.SnakeCellWeak;
 
 
 public class Game {
-    private AnchorPane grid;
+    private final AnchorPane grid;
 
-    private Pos mousePosition;
+    private final Pos mousePosition;
     private final List<SnakeBody> players;
-    private List<FoodCellAbstract> unSyncFoods = new ArrayList<>();
-    private List<FoodCellAbstract> foods = Collections.synchronizedList(unSyncFoods);
+    private final List<FoodCellAbstract> unSyncFoods = new ArrayList<>();
+    private final List<FoodCellAbstract> foods = Collections.synchronizedList(unSyncFoods);
 
     public Game() {
 
@@ -57,9 +57,7 @@ public class Game {
         }
 
         mousePosition = new Pos(0, 0);
-        grid.setOnMouseMoved(event -> {
-            mousePosition.setPos(event.getX(), event.getY());
-        });
+        grid.setOnMouseMoved(event -> mousePosition.setPos(event.getX(), event.getY()));
     }
 
     public FoodCellAbstract generateFood () {
@@ -114,44 +112,34 @@ public class Game {
         try {
             synchronized (foods) {
                 FoodCellAbstract toRemove=null;
-                Iterator<FoodCellAbstract> iterator = foods.iterator();
-                while (iterator.hasNext()) {
-                    FoodCellAbstract foodCords = iterator.next();
+                for (FoodCellAbstract foodCords : foods) {
                     if (foodCords.isOverlap(s.getHead()) && !foodCords.isEaten()) {
                         foodCords.setEaten(true);
                         foods.remove(foodCords);
-                        toRemove=foodCords;
-                        Platform.runLater(new Runnable (){
-                            @Override
-                            public void run() {
-                                grid.getChildren().remove(foodCords);
-                                if (foodCords instanceof WeakFood) {
-                                    for (int i = 0; i<8; i++) {
-                                        grid.getChildren().add(s.growSnakeWeak());
-                                    }
+                        toRemove = foodCords;
+                        Platform.runLater(() -> {
+                            grid.getChildren().remove(foodCords);
+                            if (foodCords instanceof WeakFood) {
+                                for (int i = 0; i < 8; i++) {
+                                    grid.getChildren().add(s.growSnakeWeak());
                                 }
-                                else if (foodCords instanceof PoisonedDeathFood){
-                                    List<DeathFood> destroyed =s.respawnSnake(10);
-                                    foods.addAll(destroyed);
+                            } else if (foodCords instanceof PoisonedDeathFood) {
+                                List<DeathFood> destroyed = s.respawnSnake(10);
+                                foods.addAll(destroyed);
+                            } else if (foodCords instanceof SpeedFood) {
+                                if (((SpeedFood) foodCords).isAccelerate()) {
+                                    s.getHead().increaseSpeed();
+                                } else {
+                                    s.getHead().decreaseSpeed();
                                 }
-                                else if (foodCords instanceof SpeedFood) {
-                                    if (((SpeedFood) foodCords).isAccelerate()) {
-                                        s.getHead().increaseSpeed();
-                                    }
-                                    else {
-                                        s.getHead().decreaseSpeed();
-                                    }
+                            } else if (foodCords instanceof PoisonFood) {
+                                for (int i = 0; i < 3; i++) {
+                                    grid.getChildren().add(s.growSnakePoison());
                                 }
-                                else if (foodCords instanceof PoisonFood) {
-                                    for (int i = 0; i<3; i++) {
-                                        grid.getChildren().add(s.growSnakePoison());
-                                    }
-                                }
-                                else {
-                                    grid.getChildren().add(s.growSnake(s.getHead().getColor()));
-                                }
-
+                            } else {
+                                grid.getChildren().add(s.growSnake(s.getHead().getColor()));
                             }
+
                         });
                         // iterator.remove();
                         break;
@@ -183,34 +171,31 @@ public class Game {
                 if (s.getBody().contains(snakeCell) || s.getHead().isImmune()) {continue;}
                 if (Math.abs(snakeCell.getX()-headX)<10 && Math.abs(snakeCell.getY()-headY)<10) {
                     s.getHead().changeImmune();
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (snakeCell instanceof SnakeCellWeak) {
-                                snakeBody.setTail(snakeCell.getPrev());
-                                ((SnakeCellWeak) snakeCell).destroyWeakPoint(destroyedCell);
-                                snakeBody.getBody().removeAll(destroyedCell);
-                                for (SnakeCellAbstract snakeCells : snakeBody.getBody()) {
-                                    if (snakeCells.getNext()!=null && destroyedCell.contains(snakeCells.getNext())) {
-                                        snakeCells.setNext(null);
-                                    }
+                    Platform.runLater(() -> {
+                        if (snakeCell instanceof SnakeCellWeak) {
+                            snakeBody.setTail(snakeCell.getPrev());
+                            ((SnakeCellWeak) snakeCell).destroyWeakPoint(destroyedCell);
+                            snakeBody.getBody().removeAll(destroyedCell);
+                            for (SnakeCellAbstract snakeCells : snakeBody.getBody()) {
+                                if (snakeCells.getNext()!=null && destroyedCell.contains(snakeCells.getNext())) {
+                                    snakeCells.setNext(null);
                                 }
+                            }
 
-                                snakeBody.determineTail(snakeBody.getHead());
+                            snakeBody.determineTail(snakeBody.getHead());
+                        }
+                        else if (snakeCell instanceof SnakeCellBase) {
+                            synchronized (foods){
+                                List<DeathFood> destroyed =s.respawnSnake(10);
+                                foods.addAll(destroyed);
                             }
-                            else if (snakeCell instanceof SnakeCellBase) {
-                                synchronized (foods){
-                                    List<DeathFood> destroyed =s.respawnSnake(10);
-                                    foods.addAll(destroyed);
-                                }
-                            
-                            }
-                            try {
-                                Thread.sleep(50);
-                                Platform.runLater(() -> s.getHead().changeImmune());
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+
+                        }
+                        try {
+                            Thread.sleep(50);
+                            Platform.runLater(() -> s.getHead().changeImmune());
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
                     });
                 }
@@ -227,24 +212,11 @@ public class Game {
         public void run() {
             synchronized (players){
 
-                Runtime runtime = Runtime.getRuntime();
-                // long maxMemory = runtime.maxMemory();
-                // long allocatedMemory = runtime.totalMemory();
-                // long freeMemory = runtime.freeMemory();
-
-                // System.out.println("Max Memory: " + maxMemory / (1024 * 1024) + " MB");
-                // System.out.println("Allocated Memory: " + allocatedMemory / (1024 * 1024) + " MB");
-                // System.out.println("Free Memory: " + freeMemory / (1024 * 1024) + " MB");
                 for (SnakeBody snake : players ) {
                     if (!snake.equals(players.get(0))) { moveIA(getClosestFood(snake),snake); continue; }
                     move(snake);
                     if(FoodCellAbstract.numFood<20) {
-                        Platform.runLater(new Runnable (){
-                            @Override
-                            public void run() {
-                                foods.add(generateFood());
-                            }
-                        });
+                        Platform.runLater(() -> foods.add(generateFood()));
 
                     }
 
@@ -278,12 +250,6 @@ public class Game {
 
     public AnchorPane getGrid() {
         return grid;
-    }
-
-    public List<SnakeBody> getPlayers() {
-        synchronized (players){
-            return players;
-        }
     }
 
 
