@@ -16,11 +16,7 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import slither.cells.*;
-import slither.cells.foodcells.BasicFood;
-import slither.cells.foodcells.DeathFood;
-import slither.cells.foodcells.FoodCellAbstract;
-import slither.cells.foodcells.SpeedFood;
-import slither.cells.foodcells.WeakFood;
+import slither.cells.foodcells.*;
 import slither.cells.snakecells.SnakeCell;
 import slither.cells.snakecells.SnakeCellBase;
 import slither.cells.snakecells.SnakeCellWeak;
@@ -108,14 +104,17 @@ public class Game {
 
         FoodCellAbstract foodCords;
 
-        if (r<3) {
+        if (r<2) {
             foodCords = new WeakFood(x,y,0);
         }
-        else if (r<6) {
+        else if (r<4) {
             foodCords = new SpeedFood(x,y,1,true);
         }
-        else if (r<9) {
-            foodCords = new SpeedFood(x,y,1,false);
+        else if (r<6) {
+            foodCords = new SpeedFood(x, y, 1, false);
+        }
+        else if (r<8) {
+            foodCords = new PoisonFood(x,y,0);
         }
         else {
             foodCords = new BasicFood(x,y,1);
@@ -171,6 +170,11 @@ public class Game {
                                     }
                                     else {
                                         s.getHead().decreaseSpeed();
+                                    }
+                                }
+                                else if (foodCords instanceof PoisonFood) {
+                                    for (int i = 0; i<3; i++) {
+                                        grid.getChildren().add(s.growSnakePoison());
                                     }
                                 }
                                 else {
